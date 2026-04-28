@@ -27,6 +27,7 @@ function SessionContent() {
   const [loadingQuestion, setLoadingQuestion] = useState(true);
   const [loadingEval, setLoadingEval] = useState(false);
   const [loadingHint, setLoadingHint] = useState(false);
+  const [error, setError] = useState('');
   const [phase, setPhase] = useState('answering'); // 'answering' | 'scored'
 
   useEffect(() => {
@@ -38,6 +39,7 @@ function SessionContent() {
     setAnswer('');
     setHint('');
     setEvaluation(null);
+    setError('');
     setPhase('answering');
     try {
       const res = await fetch('/api/interview/generate-question', {
@@ -89,6 +91,7 @@ function SessionContent() {
   const handleSubmit = async () => {
     if (!answer.trim()) return;
     setLoadingEval(true);
+    setError('');
     try {
       const res = await fetch('/api/interview/evaluate-answer', {
         method: 'POST',
@@ -102,8 +105,9 @@ function SessionContent() {
       const qa = { question, answer, ...data };
       setAllQAs((prev) => [...prev, qa]);
       setPreviousQuestions((prev) => [...prev, question]);
-    } catch {
-      alert('Failed to evaluate. Please try again.');
+    } catch (err) {
+      console.error(err);
+      setError('The AI service is temporarily unavailable (503). Please try submitting again in a few seconds.');
     } finally {
       setLoadingEval(false);
     }
@@ -164,6 +168,7 @@ function SessionContent() {
               onHint={handleHint}
               loading={loadingEval}
               hintLoading={loadingHint}
+              error={error}
             />
           </>
         )}
