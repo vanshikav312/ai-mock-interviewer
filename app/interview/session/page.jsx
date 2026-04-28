@@ -126,25 +126,25 @@ function SessionContent() {
 
   if (status === 'loading' || loadingQuestion) {
     return (
-      <div className="min-h-screen bg-slate-900 flex flex-col items-center justify-center gap-4">
-        <div className="w-12 h-12 border-4 border-purple-500 border-t-transparent rounded-full animate-spin" />
-        <p className="text-slate-400 animate-pulse">
-          {loadingQuestion ? 'Generating your question...' : 'Loading...'}
+      <div className="min-h-screen flex flex-col items-center justify-center gap-5">
+        <div className="w-14 h-14 border-4 border-razor-accent/30 border-t-razor-accent rounded-full animate-spin shadow-[0_0_15px_rgba(20,141,141,0.5)]" />
+        <p className="text-razor-accent font-bold tracking-wide animate-pulse">
+          {loadingQuestion ? 'Generating your question...' : 'Loading session...'}
         </p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-900">
-      <nav className="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-10">
-        <div className="max-w-3xl mx-auto px-6 py-4 flex items-center justify-between">
-          <span className="text-xl font-black text-white">
-            AI <span className="text-purple-400">Interviewer</span>
+    <div className="min-h-screen animate-fade-in">
+      <nav className="border-b border-razor-teal bg-razor-navy/90 backdrop-blur-md sticky top-0 z-20 shadow-sm">
+        <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
+          <span className="text-2xl font-black text-white tracking-tight flex items-center gap-2">
+            <span>🤖</span> AI <span className="text-razor-accent">Interviewer</span>
           </span>
           <div className="flex items-center gap-3">
-            <span className="text-slate-400 text-sm">{role}</span>
-            <span className="bg-slate-700 text-slate-300 text-xs font-semibold px-2 py-1 rounded-full">
+            <span className="text-slate-300 text-sm font-bold hidden sm:block">{role}</span>
+            <span className="bg-razor-teal/50 text-razor-green text-xs font-bold px-3 py-1.5 rounded-full border border-razor-accent/30 shadow-inner">
               {difficulty}
             </span>
           </div>
@@ -188,8 +188,8 @@ function SessionContent() {
 export default function SessionPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
-        <div className="w-12 h-12 border-4 border-purple-500 border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="w-14 h-14 border-4 border-razor-accent/30 border-t-razor-accent rounded-full animate-spin shadow-[0_0_15px_rgba(20,141,141,0.5)]" />
       </div>
     }>
       <SessionContent />

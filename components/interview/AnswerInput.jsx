@@ -4,13 +4,13 @@ export default function AnswerInput({ answer, setAnswer, onSubmit, onHint, loadi
   const wordCount = answer.trim() ? answer.trim().split(/\s+/).length : 0;
 
   return (
-    <div className="bg-slate-800/60 border border-slate-700 rounded-2xl p-6 mb-6 shadow-xl backdrop-blur-sm transition-all duration-300 hover:border-slate-600">
-      <div className="flex items-center justify-between mb-3">
-        <label className="text-slate-300 font-medium tracking-wide">Your Answer</label>
-        <span className={`text-xs font-semibold px-3 py-1 rounded-full shadow-inner ${
+    <div className="glass-panel rounded-2xl p-7 mb-8 transition-all duration-300 hover:border-razor-accent/40 hover:shadow-razor-accent/5 group">
+      <div className="flex items-center justify-between mb-4">
+        <label className="text-slate-300 font-bold tracking-widest uppercase text-sm">Your Answer</label>
+        <span className={`text-xs font-bold px-3 py-1.5 rounded-full shadow-inner ${
           wordCount < 20 ? 'bg-red-500/20 text-red-400 border border-red-500/30' :
-          wordCount < 60 ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' :
-          'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+          wordCount < 60 ? 'bg-razor-peach/20 text-razor-peach border border-razor-peach/30' :
+          'bg-razor-green/20 text-razor-green border border-razor-green/30'
         }`}>
           {wordCount} words
         </span>
@@ -21,38 +21,38 @@ export default function AnswerInput({ answer, setAnswer, onSubmit, onHint, loadi
         onChange={(e) => setAnswer(e.target.value)}
         placeholder="Type your answer here... Be detailed and specific. Aim for at least 60 words."
         rows={7}
-        className="w-full bg-slate-900/50 border border-slate-600/50 text-slate-100 rounded-xl px-5 py-4 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 placeholder-slate-500 resize-none text-sm leading-relaxed transition-all duration-300"
+        className="w-full bg-razor-navy/60 border border-razor-teal/70 text-white rounded-xl px-5 py-4 focus:outline-none focus:ring-2 focus:ring-razor-accent/50 focus:border-razor-accent placeholder-slate-500 resize-none text-sm leading-relaxed transition-all duration-300 shadow-inner font-medium"
       />
 
       {error && (
-        <div className="mt-4 p-4 bg-red-500/10 border border-red-500/20 rounded-xl flex items-start gap-3 animate-in fade-in slide-in-from-top-2">
+        <div className="mt-4 p-4 bg-red-500/10 border border-red-500/30 rounded-xl flex items-start gap-3 animate-in fade-in slide-in-from-top-2 shadow-inner">
           <span className="text-red-400 text-lg mt-0.5">⚠️</span>
           <div>
-            <h4 className="text-red-400 font-medium text-sm">Submission Failed</h4>
-            <p className="text-red-400/80 text-xs mt-1 leading-relaxed">{error}</p>
+            <h4 className="text-red-400 font-bold text-sm tracking-wide">Submission Failed</h4>
+            <p className="text-red-300 text-xs mt-1 leading-relaxed font-medium">{error}</p>
           </div>
         </div>
       )}
 
-      <div className="flex gap-3 mt-5">
+      <div className="flex gap-4 mt-6">
         <button onClick={onHint} disabled={hintLoading || loading}
-          className="flex items-center justify-center min-w-[120px] gap-2 px-5 py-3 bg-slate-800 hover:bg-slate-700 border border-slate-600 hover:border-amber-500/50 text-slate-300 hover:text-amber-400 rounded-xl text-sm font-medium transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed group shadow-sm">
+          className="flex items-center justify-center min-w-[130px] gap-2 px-5 py-3.5 bg-razor-teal/40 hover:bg-razor-teal/70 border border-razor-accent/30 hover:border-razor-peach/50 text-slate-300 hover:text-razor-peach rounded-xl text-sm font-bold transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed group shadow-sm">
           {hintLoading ? (
-            <span className="animate-pulse">Getting hint...</span>
+            <span className="animate-pulse tracking-wide">Getting hint...</span>
           ) : (
             <><span className="group-hover:scale-110 transition-transform">💡</span> Get Hint</>
           )}
         </button>
 
         <button onClick={onSubmit} disabled={loading || !answer.trim() || hintLoading}
-          className="flex-1 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-3 rounded-xl text-sm shadow-lg shadow-purple-500/20 hover:shadow-purple-500/40 transition-all duration-300 transform active:scale-[0.98]">
+          className="flex-1 bg-razor-peach hover:bg-razor-peach/90 disabled:opacity-50 disabled:cursor-not-allowed text-razor-navy font-black py-3.5 rounded-xl text-sm shadow-lg shadow-razor-peach/20 hover:shadow-razor-peach/40 transition-all duration-300 transform active:scale-[0.98] tracking-widest uppercase">
           {loading ? (
-            <span className="flex items-center justify-center gap-2">
-              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            <span className="flex items-center justify-center gap-3">
+              <div className="w-5 h-5 border-2 border-razor-navy/30 border-t-razor-navy rounded-full animate-spin" />
               Evaluating...
             </span>
           ) : (
-            'Submit Answer →'
+            'Submit Answer 🚀'
           )}
         </button>
       </div>

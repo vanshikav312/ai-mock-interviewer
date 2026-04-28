@@ -4,9 +4,9 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload?.length) {
     return (
-      <div className="bg-slate-800 border border-slate-700 rounded-lg p-3 shadow-xl">
-        <p className="text-slate-400 text-xs mb-1">{label}</p>
-        <p className="text-purple-400 font-bold">{payload[0].value} / 100</p>
+      <div className="bg-razor-navy border border-razor-teal rounded-xl p-4 shadow-2xl backdrop-blur-md">
+        <p className="text-slate-400 text-xs font-bold uppercase tracking-widest mb-2">{label}</p>
+        <p className="text-razor-accent font-black text-xl">{payload[0].value} <span className="text-sm text-slate-500">/ 100</span></p>
       </div>
     );
   }
@@ -24,24 +24,26 @@ export default function PerformanceChart({ sessions }) {
 
   if (data.length === 0) {
     return (
-      <div className="bg-slate-800/60 border border-slate-700 rounded-2xl p-8 text-center mb-8">
-        <p className="text-slate-400">Complete your first interview to see performance trends.</p>
+      <div className="glass-panel p-10 text-center mb-10 rounded-2xl border-dashed border-2 border-razor-teal/40">
+        <p className="text-slate-400 font-medium">Complete your first interview to see performance trends.</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-slate-800/60 border border-slate-700 rounded-2xl p-6 mb-8">
-      <h2 className="text-white font-bold text-lg mb-6">Performance Over Time</h2>
-      <ResponsiveContainer width="100%" height={240}>
+    <div className="glass-panel rounded-2xl p-7 mb-10">
+      <h2 className="text-white font-bold text-xl mb-7 flex items-center gap-2">
+        <span>📈</span> Performance Trends
+      </h2>
+      <ResponsiveContainer width="100%" height={260}>
         <LineChart data={data}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-          <XAxis dataKey="name" stroke="#94a3b8" tick={{ fontSize: 11 }} />
-          <YAxis domain={[0, 100]} stroke="#94a3b8" tick={{ fontSize: 11 }} />
-          <Tooltip content={<CustomTooltip />} />
+          <CartesianGrid strokeDasharray="3 3" stroke="#1A4A5A" vertical={false} />
+          <XAxis dataKey="name" stroke="#64748b" tick={{ fontSize: 12, fill: '#94a3b8' }} tickLine={false} axisLine={false} />
+          <YAxis domain={[0, 100]} stroke="#64748b" tick={{ fontSize: 12, fill: '#94a3b8' }} tickLine={false} axisLine={false} />
+          <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#148D8D', strokeWidth: 1, strokeDasharray: '4 4' }} />
           <Line
-            type="monotone" dataKey="score" stroke="#a855f7"
-            strokeWidth={2.5} dot={{ fill: '#a855f7', r: 4 }} activeDot={{ r: 6 }}
+            type="monotone" dataKey="score" stroke="#148D8D"
+            strokeWidth={3} dot={{ fill: '#0E2C40', stroke: '#148D8D', strokeWidth: 2, r: 5 }} activeDot={{ r: 7, fill: '#148D8D', stroke: '#C1E1A7', strokeWidth: 2 }}
           />
         </LineChart>
       </ResponsiveContainer>

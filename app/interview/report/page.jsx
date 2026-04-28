@@ -64,18 +64,18 @@ function ReportContent() {
 
   if (status === 'loading' || loading) {
     return (
-      <div className="min-h-screen bg-slate-900 flex flex-col items-center justify-center gap-4">
-        <div className="w-12 h-12 border-4 border-purple-500 border-t-transparent rounded-full animate-spin" />
-        <p className="text-slate-400 animate-pulse">Generating your final report...</p>
+      <div className="min-h-screen flex flex-col items-center justify-center gap-5">
+        <div className="w-14 h-14 border-4 border-razor-accent/30 border-t-razor-accent rounded-full animate-spin shadow-[0_0_15px_rgba(20,141,141,0.5)]" />
+        <p className="text-razor-accent font-bold tracking-wide animate-pulse">Generating your final report...</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-slate-900 flex flex-col items-center justify-center gap-4">
-        <p className="text-red-400 text-xl">{error}</p>
-        <Link href="/interview/setup" className="bg-purple-600 text-white px-6 py-3 rounded-xl font-semibold">
+      <div className="min-h-screen flex flex-col items-center justify-center gap-5">
+        <p className="text-red-400 text-xl font-bold">⚠️ {error}</p>
+        <Link href="/interview/setup" className="bg-razor-peach hover:bg-razor-peach/90 text-razor-navy px-8 py-3.5 rounded-xl font-black shadow-lg shadow-razor-peach/20">
           Start New Interview
         </Link>
       </div>
@@ -83,26 +83,28 @@ function ReportContent() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-900">
-      <nav className="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-10">
-        <div className="max-w-3xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link href="/dashboard" className="text-xl font-black text-white">
-            AI <span className="text-purple-400">Interviewer</span>
+    <div className="min-h-screen animate-fade-in">
+      <nav className="border-b border-razor-teal bg-razor-navy/90 backdrop-blur-md sticky top-0 z-20 shadow-sm">
+        <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
+          <Link href="/dashboard" className="text-2xl font-black text-white tracking-tight flex items-center gap-2">
+            <span>🤖</span> AI <span className="text-razor-accent">Interviewer</span>
           </Link>
-          <Link href="/dashboard" className="text-slate-400 hover:text-white text-sm transition-colors">
-            ← Dashboard
+          <Link href="/dashboard" className="text-slate-400 hover:text-white text-sm font-bold transition-colors">
+            ← Back to Dashboard
           </Link>
         </div>
       </nav>
-      <main className="max-w-3xl mx-auto px-6 py-10">
-        <div className="mb-8 text-center">
-          <h1 className="text-4xl font-black text-white mb-2">Interview Complete! 🎉</h1>
-          <p className="text-slate-400">Here's your detailed performance report.</p>
+      <main className="max-w-4xl mx-auto px-6 py-12">
+        <div className="mb-10 text-center animate-slide-up">
+          <h1 className="text-4xl font-black text-white mb-3 tracking-tight">Interview Complete! 🎉</h1>
+          <p className="text-slate-300 font-medium">Here is your detailed performance report.</p>
         </div>
-        <FinalReport
-          report={report} role={role} difficulty={difficulty}
-          onSave={handleSave} saving={saving} saved={saved}
-        />
+        <div className="animate-slide-up" style={{ animationDelay: '100ms' }}>
+          <FinalReport
+            report={report} role={role} difficulty={difficulty}
+            onSave={handleSave} saving={saving} saved={saved}
+          />
+        </div>
       </main>
     </div>
   );
@@ -111,8 +113,8 @@ function ReportContent() {
 export default function ReportPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
-        <div className="w-12 h-12 border-4 border-purple-500 border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="w-14 h-14 border-4 border-razor-accent/30 border-t-razor-accent rounded-full animate-spin shadow-[0_0_15px_rgba(20,141,141,0.5)]" />
       </div>
     }>
       <ReportContent />

@@ -4,25 +4,25 @@ export default function QuestionCard({ question, questionNumber, totalQuestions 
   const progress = (questionNumber / totalQuestions) * 100;
 
   return (
-    <div className="glass-panel rounded-2xl p-6 mb-6 animate-slide-up">
-      <div className="flex items-center justify-between mb-4">
-        <span className="text-sm text-slate-400 font-medium tracking-wide">
+    <div className="glass-panel rounded-2xl p-7 mb-8 animate-slide-up">
+      <div className="flex items-center justify-between mb-5">
+        <span className="text-sm text-slate-300 font-bold tracking-widest uppercase">
           Question {questionNumber} of {totalQuestions}
         </span>
-        <span className="text-sm text-indigo-400 font-semibold bg-indigo-500/10 px-3 py-1 rounded-full border border-indigo-500/20 shadow-inner">
+        <span className="text-sm text-razor-green font-bold bg-razor-green/10 px-4 py-1.5 rounded-full border border-razor-green/20 shadow-inner">
           {Math.round(progress)}% complete
         </span>
       </div>
 
-      <div className="w-full bg-slate-900/50 rounded-full h-2.5 mb-6 shadow-inner overflow-hidden border border-slate-700/50">
+      <div className="w-full bg-razor-navy/60 rounded-full h-3 mb-8 shadow-inner overflow-hidden border border-razor-teal/50">
         <div
-          className="bg-gradient-to-r from-purple-500 via-indigo-500 to-cyan-500 h-2.5 rounded-full transition-all duration-700 ease-out shadow-[0_0_10px_rgba(129,140,248,0.5)]"
+          className="bg-razor-accent h-3 rounded-full transition-all duration-700 ease-out shadow-[0_0_12px_rgba(20,141,141,0.6)]"
           style={{ width: `${progress}%` }}
         />
       </div>
 
-      <div className="bg-slate-900/40 rounded-xl p-6 border border-slate-700/50 shadow-inner backdrop-blur-sm">
-        <p className="text-white text-lg leading-relaxed font-medium animate-fade-in">{question}</p>
+      <div className="bg-razor-navy/40 rounded-2xl p-7 border border-razor-teal shadow-inner backdrop-blur-sm">
+        <p className="text-white text-xl leading-relaxed font-semibold animate-fade-in">{question}</p>
       </div>
     </div>
   );

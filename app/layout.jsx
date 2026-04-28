@@ -12,7 +12,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className={`${inter.className} bg-slate-900 text-white antialiased`}>
+      <body className={`${inter.className} antialiased min-h-screen flex flex-col`}>
         <SessionProviderWrapper>{children}</SessionProviderWrapper>
       </body>
     </html>

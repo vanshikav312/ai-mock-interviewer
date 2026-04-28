@@ -30,42 +30,49 @@ export default function SetupPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-900">
-      <nav className="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-10">
-        <div className="max-w-3xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link href="/dashboard" className="text-xl font-black text-white">
-            AI <span className="text-purple-400">Interviewer</span>
+    <div className="min-h-screen animate-fade-in">
+      <nav className="border-b border-razor-teal bg-razor-navy/90 backdrop-blur-md sticky top-0 z-20 shadow-sm">
+        <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
+          <Link href="/dashboard" className="text-2xl font-black text-white tracking-tight flex items-center gap-2">
+            <span>🤖</span> AI <span className="text-razor-accent">Interviewer</span>
           </Link>
-          <Link href="/dashboard" className="text-slate-400 hover:text-white text-sm transition-colors">
-            ← Dashboard
+          <Link href="/dashboard" className="text-slate-400 hover:text-white text-sm font-bold transition-colors">
+            ← Back to Dashboard
           </Link>
         </div>
       </nav>
 
       <main className="max-w-3xl mx-auto px-6 py-12">
-        <div className="mb-10 text-center">
-          <h1 className="text-4xl font-black text-white mb-3">Configure Your Interview</h1>
-          <p className="text-slate-400">Choose your role, difficulty, and number of questions.</p>
+        <div className="mb-10 text-center animate-slide-up">
+          <h1 className="text-4xl font-black text-white mb-3 tracking-tight">Configure Interview ⚙️</h1>
+          <p className="text-slate-300 font-medium">Customize your practice session.</p>
         </div>
 
-        <div className="bg-slate-800/60 border border-slate-700 rounded-2xl p-8 mb-8">
+        <div className="glass-panel p-8 mb-8 animate-slide-up" style={{ animationDelay: '100ms' }}>
           <RoleSelector config={config} setConfig={setConfig} />
         </div>
 
-        <div className="bg-slate-800/40 border border-slate-700 rounded-2xl p-6 mb-8 flex items-center gap-4">
-          <div className="text-3xl">📋</div>
+        <div className="bg-razor-teal/30 border border-razor-accent/30 rounded-2xl p-6 mb-8 flex items-center gap-5 shadow-inner backdrop-blur-sm animate-slide-up" style={{ animationDelay: '200ms' }}>
+          <div className="w-14 h-14 bg-razor-navy/50 border border-razor-teal rounded-xl flex items-center justify-center text-3xl shadow-inner">📋</div>
           <div>
-            <p className="text-white font-semibold">
-              {config.questionCount} {config.role} questions · {config.difficulty} difficulty
+            <p className="text-white font-bold text-lg mb-1">
+              {config.questionCount} {config.role} questions • {config.difficulty}
             </p>
-            <p className="text-slate-400 text-sm">Estimated time: ~{config.questionCount * 3} minutes</p>
+            <p className="text-razor-green font-medium text-sm">⏱️ Estimated time: ~{config.questionCount * 3} minutes</p>
           </div>
         </div>
 
-        <button onClick={handleStart} disabled={starting}
-          className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-black text-xl py-5 rounded-2xl transition-all duration-200 shadow-lg shadow-purple-900/50">
-          {starting ? 'Starting...' : 'Start Interview →'}
-        </button>
+        <div className="animate-slide-up" style={{ animationDelay: '300ms' }}>
+          <button onClick={handleStart} disabled={starting}
+            className="w-full bg-razor-peach hover:bg-razor-peach/90 disabled:opacity-50 disabled:cursor-not-allowed text-razor-navy font-black text-xl py-5 rounded-2xl transition-all duration-300 shadow-lg shadow-razor-peach/20 hover:shadow-razor-peach/40 transform hover:-translate-y-1">
+            {starting ? (
+              <span className="flex items-center justify-center gap-3">
+                <div className="w-6 h-6 border-4 border-razor-navy/30 border-t-razor-navy rounded-full animate-spin" />
+                Preparing Environment...
+              </span>
+            ) : '🚀 Start Interview Now'}
+          </button>
+        </div>
       </main>
     </div>
   );
