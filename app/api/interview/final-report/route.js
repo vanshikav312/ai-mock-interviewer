@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { generateFinalReport } from '@/lib/gemini';
+import { generateReportNarrative } from '@/lib/gemini';
 
 export async function POST(request) {
   try {
@@ -12,9 +12,61 @@ export async function POST(request) {
       );
     }
 
-    const report = await generateFinalReport(role, allQAs);
+    // ── Compute everything locally — no AI needed for math ───────────────────
+    const overallScore = Math.round(
+      allQAs.reduce((sum, qa) => sum + (qa.score || 0), 0) / allQAs.length
+    );
 
-    return NextResponse.json(report);
+    const grade =
+      overallScore >= 85 ? 'A' :
+      overallScore >= 70 ? 'B' :
+      overallScore >= 50 ? 'C' : 'D';
+
+    const hiringVerdict =
+      overallScore >= 85 ? 'Strong Hire' :
+      overallScore >= 70 ? 'Hire' :
+      overallScore >= 50 ? 'Maybe' : 'No Hire';
+
+    // Top 3 QAs by score → extract strengths
+    const sorted = [...allQAs].sort((a, b) => (b.score || 0) - (a.score || 0));
+    const topStrengths = sorted
+      .slice(0, 3)
+      .map((qa) => qa.strengths || 'Demonstrated understanding of the topic')
+      .filter(Boolean);
+
+    // Bottom 3 QAs by score → extract improvements
+    const criticalGaps = sorted
+      .slice(-3)
+      .reverse()
+      .map((qa) => qa.improvements || 'Review core concepts')
+      .filter(Boolean);
+
+    // ── One Gemini/Groq call for narrative only ─────────────────────────────
+    let narrative = {
+      summary: `The candidate scored ${overallScore}/100 (${grade}) in this ${role} interview.`,
+      nextSteps: 'Focus on the critical gaps identified and practice regularly. Review the study topics and work on structured answers.',
+      studyTopics: criticalGaps.slice(0, 4).map(g => g.split(' ').slice(0, 4).join(' ')),
+    };
+    try {
+      narrative = await generateReportNarrative(
+        role, overallScore, grade, hiringVerdict, topStrengths, criticalGaps
+      );
+    } catch (narrativeErr) {
+      console.warn('Narrative generation failed, using local fallback:', narrativeErr.message);
+    }
+
+    // ── Merge and return ─────────────────────────────────────────────────────
+    return NextResponse.json({
+      overallScore,
+      grade,
+      hiringVerdict,
+      topStrengths,
+      criticalGaps,
+      summary: narrative.summary,
+      nextSteps: narrative.nextSteps,
+      studyTopics: narrative.studyTopics,
+    });
+
   } catch (error) {
     console.error('Final report error:', error);
     return NextResponse.json(

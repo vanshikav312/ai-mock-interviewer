@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, useRef, Suspense } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
@@ -12,49 +12,138 @@ function ReportContent() {
 
   const role = params.get('role') || 'Software Engineer';
   const difficulty = params.get('difficulty') || 'Medium';
-  const rawQas = params.get('qas');
 
+  const [rawQas, setRawQas] = useState(null);
   const [report, setReport] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState('');
+  const autoSaveDone = useRef(false);
 
   useEffect(() => {
     if (status === 'unauthenticated') router.push('/login');
   }, [status, router]);
 
+  // Read from sessionStorage on mount (must be inside useEffect — client only)
   useEffect(() => {
-    if (!rawQas) { setError('No interview data found.'); setLoading(false); return; }
-    const allQAs = JSON.parse(decodeURIComponent(rawQas));
+    const stored = sessionStorage.getItem('interviewQAs');
+    if (stored) {
+      setRawQas(stored);
+    } else {
+      setError('No interview data found.');
+      setLoading(false);
+    }
+  }, []);
+
+  // Generate report once rawQas is ready
+  useEffect(() => {
+    if (!rawQas) return;
+
+    let allQAs;
+    try {
+      allQAs = JSON.parse(rawQas);
+    } catch {
+      setError('Invalid interview data.');
+      setLoading(false);
+      return;
+    }
+
+    // Strip extra fields to match MongoDB schema
+    const cleanQAs = allQAs.map(({ question, answer, score, clarity, technical, relevance, verdict, idealAnswer, strengths, improvements, fillerWordCount }) => ({
+      question: question || '',
+      answer: answer || '',
+      score: score || 0,
+      clarity: clarity || 0,
+      technical: technical || 0,
+      relevance: relevance || 0,
+      verdict: verdict || '',
+      fillerWords: fillerWordCount || 0,
+      idealAnswer: idealAnswer || '',
+      strengths: strengths || '',
+      improvements: improvements || '',
+    }));
+
     fetch('/api/interview/final-report', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ role, allQAs }),
     })
       .then((r) => r.json())
-      .then((data) => { setReport(data); setLoading(false); })
-      .catch(() => { setError('Failed to generate report.'); setLoading(false); });
-  }, [role, rawQas]);
+      .then(async (data) => {
+        setReport(data);
+        setLoading(false);
 
+        // AUTO-SAVE — only once (ref prevents double-save in React StrictMode)
+        if (autoSaveDone.current) return;
+        autoSaveDone.current = true;
+
+        setSaving(true);
+        try {
+          const res = await fetch('/api/sessions', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              role,
+              difficulty,
+              questions: cleanQAs,
+              overallScore: data.overallScore,
+              grade: data.grade,
+              hiringVerdict: data.hiringVerdict,
+              finalReport: data,
+            }),
+          });
+          if (!res.ok) {
+            const err = await res.json();
+            console.error('Auto-save failed:', err);
+          } else {
+            setSaved(true);
+          }
+        } catch (e) {
+          console.error('Auto-save error:', e);
+        } finally {
+          setSaving(false);
+        }
+      })
+      .catch(() => {
+        setError('Failed to generate report.');
+        setLoading(false);
+      });
+  }, [role, difficulty, rawQas]);
+
+  // Manual save fallback (if auto-save failed)
   const handleSave = async () => {
-    if (!report || saved) return;
+    if (!report || saved || !rawQas) return;
     setSaving(true);
     try {
-      const allQAs = JSON.parse(decodeURIComponent(rawQas));
-      await fetch('/api/sessions', {
+      const allQAs = JSON.parse(rawQas);
+      const cleanQAs = allQAs.map(({ question, answer, score, clarity, technical, relevance, verdict, idealAnswer, strengths, improvements, fillerWordCount }) => ({
+        question: question || '',
+        answer: answer || '',
+        score: score || 0,
+        clarity: clarity || 0,
+        technical: technical || 0,
+        relevance: relevance || 0,
+        verdict: verdict || '',
+        fillerWords: fillerWordCount || 0,
+        idealAnswer: idealAnswer || '',
+        strengths: strengths || '',
+        improvements: improvements || '',
+      }));
+      const res = await fetch('/api/sessions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           role, difficulty,
-          questions: allQAs,
+          questions: cleanQAs,
           overallScore: report.overallScore,
           grade: report.grade,
           hiringVerdict: report.hiringVerdict,
           finalReport: report,
         }),
       });
-      setSaved(true);
+      if (res.ok) setSaved(true);
+      else alert('Failed to save. Please try again.');
     } catch {
       alert('Failed to save. Please try again.');
     } finally {
@@ -62,7 +151,7 @@ function ReportContent() {
     }
   };
 
-  if (status === 'loading' || loading) {
+  if (status === 'loading' || loading || (rawQas === null && !error)) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center gap-5">
         <div className="w-14 h-14 border-4 border-razor-accent/30 border-t-razor-accent rounded-full animate-spin shadow-[0_0_15px_rgba(20,141,141,0.5)]" />
@@ -97,7 +186,9 @@ function ReportContent() {
       <main className="max-w-4xl mx-auto px-6 py-12">
         <div className="mb-10 text-center animate-slide-up">
           <h1 className="text-4xl font-black text-white mb-3 tracking-tight">Interview Complete! 🎉</h1>
-          <p className="text-slate-300 font-medium">Here is your detailed performance report.</p>
+          {saving && <p className="text-razor-accent text-sm font-bold animate-pulse mt-2">💾 Auto-saving your results...</p>}
+          {saved && <p className="text-razor-green text-sm font-bold mt-2">✓ Results saved to your dashboard</p>}
+          <p className="text-slate-300 font-medium mt-1">Here is your detailed performance report.</p>
         </div>
         <div className="animate-slide-up" style={{ animationDelay: '100ms' }}>
           <FinalReport
@@ -114,7 +205,7 @@ export default function ReportPage() {
   return (
     <Suspense fallback={
       <div className="min-h-screen flex items-center justify-center">
-        <div className="w-14 h-14 border-4 border-razor-accent/30 border-t-razor-accent rounded-full animate-spin shadow-[0_0_15px_rgba(20,141,141,0.5)]" />
+        <div className="w-14 h-14 border-4 border-razor-accent/30 border-t-razor-accent rounded-full animate-spin" />
       </div>
     }>
       <ReportContent />

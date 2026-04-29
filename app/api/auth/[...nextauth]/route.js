@@ -50,18 +50,31 @@ export const authOptions = {
       return true;
     },
     async session({ session, token }) {
-      if (token) {
+      // Prefer token.id (set on login) — avoids extra DB call each request
+      if (token?.id) {
+        session.user.id = token.id;
+      } else if (session?.user?.email) {
+        // Fallback: look up by email (Google OAuth first login)
         await connectDB();
-        const dbUser = await User.findOne({ email: session.user.email });
+        const dbUser = await User.findOne({ email: session.user.email }).lean();
         if (dbUser) {
           session.user.id = dbUser._id.toString();
+          // Also store in token for next time
+          token.id = dbUser._id.toString();
         }
       }
       return session;
     },
-    async jwt({ token, user }) {
-      if (user) {
+    async jwt({ token, user, account, profile }) {
+      // On initial sign-in, user object is present
+      if (user?.id) {
         token.id = user.id;
+      }
+      // For Google OAuth first login, look up the DB user
+      if (account?.provider === 'google' && !token.id) {
+        await connectDB();
+        const dbUser = await User.findOne({ email: token.email }).lean();
+        if (dbUser) token.id = dbUser._id.toString();
       }
       return token;
     },

@@ -2,7 +2,7 @@
 
 const ROLES = ['Software Engineer', 'Data Analyst', 'Product Manager', 'Frontend Developer'];
 const DIFFICULTIES = ['Easy', 'Medium', 'Hard'];
-const QUESTION_COUNTS = [5, 8, 10];
+const QUESTION_COUNTS = [2, 5, 8, 10];
 
 export default function RoleSelector({ config, setConfig }) {
   return (
