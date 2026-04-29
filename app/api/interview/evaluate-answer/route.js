@@ -31,9 +31,13 @@ export async function POST(request) {
     return NextResponse.json(result);
   } catch (error) {
     console.error('Evaluate answer error:', error);
+    const status = error?.status ?? error?.httpErrorCode ?? error?.response?.status;
+    const isOverloaded = status === 503 || status === 429 ||
+      error?.message?.includes('503') || error?.message?.includes('overloaded');
+
     return NextResponse.json(
-      { error: 'Failed to evaluate answer', details: error.message, stack: error.stack },
-      { status: 500 }
+      { error: isOverloaded ? 'AI service overloaded' : 'Failed to evaluate answer', details: error.message },
+      { status: isOverloaded ? 503 : 500 }
     );
   }
 }

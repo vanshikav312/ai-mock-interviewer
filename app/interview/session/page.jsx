@@ -7,6 +7,7 @@ import QuestionCard from '@/components/interview/QuestionCard';
 import AnswerInput from '@/components/interview/AnswerInput';
 import ScoreCard from '@/components/interview/ScoreCard';
 import HintBox from '@/components/interview/HintBox';
+import { useTextToSpeech } from '@/hooks/useSpeech';
 
 function SessionContent() {
   const { status } = useSession();
@@ -28,7 +29,10 @@ function SessionContent() {
   const [loadingEval, setLoadingEval] = useState(false);
   const [loadingHint, setLoadingHint] = useState(false);
   const [error, setError] = useState('');
-  const [phase, setPhase] = useState('answering'); // 'answering' | 'scored'
+  const [phase, setPhase] = useState('answering');
+
+  // TTS hook
+  const { speaking, muted, supported: ttsSupported, speak, stop, toggleMute } = useTextToSpeech();
 
   useEffect(() => {
     if (status === 'unauthenticated') router.push('/login');
@@ -41,37 +45,44 @@ function SessionContent() {
     setEvaluation(null);
     setError('');
     setPhase('answering');
+    stop(); // stop any ongoing TTS when fetching new question
     try {
       const res = await fetch('/api/interview/generate-question', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ role, difficulty, previousQuestions: prevQs }),
       });
-      if (!res.ok) throw new Error('Failed to fetch API');
+      if (!res.ok) throw new Error('Failed');
       const data = await res.json();
-      if (!data.question) throw new Error('No question returned');
+      if (!data.question) throw new Error('No question');
       setQuestion(data.question);
     } catch {
       setQuestion('Explain a challenging technical problem you solved and how you approached it.');
     } finally {
       setLoadingQuestion(false);
     }
-  }, [role, difficulty]);
+  }, [role, difficulty, stop]);
 
+  // Auto-speak question when it loads
   useEffect(() => {
-    fetchQuestion([]);
-  }, [fetchQuestion]);
+    if (question && !loadingQuestion) {
+      speak(question);
+    }
+  }, [question, loadingQuestion, speak]);
+
+  useEffect(() => { fetchQuestion([]); }, [fetchQuestion]);
 
   const handleHint = async () => {
     setLoadingHint(true);
     setHint('');
+    stop();
     try {
       const res = await fetch('/api/interview/hint-stream', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ role, question, partialAnswer: answer }),
       });
-      if (!res.ok) throw new Error('Failed to fetch API');
+      if (!res.ok) throw new Error('Failed');
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
       let accumulated = '';
@@ -92,13 +103,20 @@ function SessionContent() {
     if (!answer.trim()) return;
     setLoadingEval(true);
     setError('');
+    stop();
     try {
       const res = await fetch('/api/interview/evaluate-answer', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ role, question, answer }),
       });
-      if (!res.ok) throw new Error('Failed to fetch API');
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        if (res.status === 503) {
+          throw new Error('overloaded');
+        }
+        throw new Error(data.error || 'Failed');
+      }
       const data = await res.json();
       setEvaluation(data);
       setPhase('scored');
@@ -106,8 +124,11 @@ function SessionContent() {
       setAllQAs((prev) => [...prev, qa]);
       setPreviousQuestions((prev) => [...prev, question]);
     } catch (err) {
-      console.error(err);
-      setError('The AI service is temporarily unavailable (503). Please try submitting again in a few seconds.');
+      if (err.message === 'overloaded') {
+        setError('The AI service is temporarily busy. Your answer is saved — click Submit again in a moment.');
+      } else {
+        setError('Something went wrong evaluating your answer. Please try again.');
+      }
     } finally {
       setLoadingEval(false);
     }
@@ -156,6 +177,11 @@ function SessionContent() {
           question={question}
           questionNumber={currentIndex + 1}
           totalQuestions={totalQuestions}
+          onReplay={() => speak(question)}
+          speaking={speaking}
+          muted={muted}
+          onToggleMute={toggleMute}
+          ttsSupported={ttsSupported}
         />
 
         {phase === 'answering' && (
