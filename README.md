@@ -1,4 +1,4 @@
-# 🤖 AI Mock Interviewer
+# AI Mock Interviewer
 
  A production-grade AI mock interview platform with voice, streaming, multi-provider AI routing, NLP scoring, and persistent analytics.
 

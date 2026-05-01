@@ -7,8 +7,8 @@ function StatCard({ label, value, icon, colorClass, borderClass }) {
         {icon}
       </div>
       <div>
-        <p className="text-slate-300 font-medium text-sm tracking-wide mb-1 uppercase">{label}</p>
-        <p className="text-white text-3xl font-black">{value}</p>
+        <p className="text-sage/60 font-medium text-sm tracking-wide mb-1 uppercase">{label}</p>
+        <p className="text-cream text-3xl font-black">{value}</p>
       </div>
     </div>
   );
@@ -23,9 +23,9 @@ export default function StatsGrid({ sessions }) {
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
-      <StatCard label="Total Interviews" value={total} icon="🎯" colorClass="bg-razor-accent/20 text-razor-accent border border-razor-accent/30" borderClass="hover:border-razor-accent/50" />
+      <StatCard label="Total Interviews" value={total} icon="🎯" colorClass="bg-emerald/20 text-emerald border border-emerald/30" borderClass="hover:border-emerald/50" />
       <StatCard label="Average Score" value={`${avgScore}/100`} icon="📈" colorClass="bg-blue-500/20 text-blue-400 border border-blue-500/30" borderClass="hover:border-blue-500/50" />
-      <StatCard label="Best Score" value={`${bestScore}/100`} icon="🏆" colorClass="bg-razor-peach/20 text-razor-peach border border-razor-peach/30" borderClass="hover:border-razor-peach/50" />
+      <StatCard label="Best Score" value={`${bestScore}/100`} icon="🏆" colorClass="bg-gold/20 text-gold border border-gold/30" borderClass="hover:border-gold/50" />
     </div>
   );
 }

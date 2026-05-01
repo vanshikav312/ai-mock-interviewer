@@ -25,7 +25,6 @@ function ReportContent() {
     if (status === 'unauthenticated') router.push('/login');
   }, [status, router]);
 
-  // Read from sessionStorage on mount (must be inside useEffect — client only)
   useEffect(() => {
     const stored = sessionStorage.getItem('interviewQAs');
     if (stored) {
@@ -36,7 +35,6 @@ function ReportContent() {
     }
   }, []);
 
-  // Generate report once rawQas is ready
   useEffect(() => {
     if (!rawQas) return;
 
@@ -49,7 +47,6 @@ function ReportContent() {
       return;
     }
 
-    // Strip extra fields to match MongoDB schema
     const cleanQAs = allQAs.map(({ question, answer, score, clarity, technical, relevance, verdict, idealAnswer, strengths, improvements, fillerWordCount }) => ({
       question: question || '',
       answer: answer || '',
@@ -74,7 +71,6 @@ function ReportContent() {
         setReport(data);
         setLoading(false);
 
-        // AUTO-SAVE — only once (ref prevents double-save in React StrictMode)
         if (autoSaveDone.current) return;
         autoSaveDone.current = true;
 
@@ -93,12 +89,7 @@ function ReportContent() {
               finalReport: data,
             }),
           });
-          if (!res.ok) {
-            const err = await res.json();
-            console.error('Auto-save failed:', err);
-          } else {
-            setSaved(true);
-          }
+          if (res.ok) setSaved(true);
         } catch (e) {
           console.error('Auto-save error:', e);
         } finally {
@@ -111,7 +102,6 @@ function ReportContent() {
       });
   }, [role, difficulty, rawQas]);
 
-  // Manual save fallback (if auto-save failed)
   const handleSave = async () => {
     if (!report || saved || !rawQas) return;
     setSaving(true);
@@ -143,7 +133,6 @@ function ReportContent() {
         }),
       });
       if (res.ok) setSaved(true);
-      else alert('Failed to save. Please try again.');
     } catch {
       alert('Failed to save. Please try again.');
     } finally {
@@ -153,43 +142,53 @@ function ReportContent() {
 
   if (status === 'loading' || loading || (rawQas === null && !error)) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-5">
-        <div className="w-14 h-14 border-4 border-razor-accent/30 border-t-razor-accent rounded-full animate-spin shadow-[0_0_15px_rgba(20,141,141,0.5)]" />
-        <p className="text-razor-accent font-bold tracking-wide animate-pulse">Generating your final report...</p>
+      <div className="min-h-screen bg-soft flex flex-col items-center justify-center gap-6">
+        <div className="w-16 h-16 border-4 border-luxury/10 border-t-luxury rounded-full animate-spin shadow-soft" />
+        <div className="text-center space-y-2">
+          <p className="text-luxury font-black tracking-widest text-xs uppercase animate-pulse">Distilling Insights...</p>
+          <p className="text-muted text-sm font-medium italic opacity-60">"Generating your comprehensive technical breakdown."</p>
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-5">
-        <p className="text-red-400 text-xl font-bold">⚠️ {error}</p>
-        <Link href="/interview/setup" className="bg-razor-peach hover:bg-razor-peach/90 text-razor-navy px-8 py-3.5 rounded-xl font-black shadow-lg shadow-razor-peach/20">
-          Start New Interview
+      <div className="min-h-screen bg-soft flex flex-col items-center justify-center gap-8">
+        <div className="text-6xl animate-float">⚠️</div>
+        <p className="text-luxury text-2xl font-black tracking-tighter">{error}</p>
+        <Link href="/interview/setup" className="pill-btn bg-luxury text-white px-10 py-4 shadow-soft hover:shadow-elevated transition-all">
+          Restart Journey
         </Link>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen animate-fade-in">
-      <nav className="border-b border-razor-teal bg-razor-navy/90 backdrop-blur-md sticky top-0 z-20 shadow-sm">
-        <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link href="/dashboard" className="text-2xl font-black text-white tracking-tight flex items-center gap-2">
-            <span>🤖</span> AI <span className="text-razor-accent">Interviewer</span>
+    <div className="min-h-screen bg-soft selection:bg-luxury/10">
+      {/* Floating Navigation */}
+      <nav className="fixed top-6 left-1/2 -translate-x-1/2 z-50 w-[90%] max-w-4xl">
+        <div className="glass-panel px-8 py-4 rounded-pill flex items-center justify-between shadow-soft border border-depth/20">
+          <Link href="/dashboard" className="flex items-center gap-3">
+            <img src="/logo.png" alt="Logo" className="w-16 h-16 object-contain" />
+            <span className="font-black text-luxury tracking-tighter text-xl">AI Mock Interviewer</span>
           </Link>
-          <Link href="/dashboard" className="text-slate-400 hover:text-white text-sm font-bold transition-colors">
-            ← Back to Dashboard
+          <Link href="/dashboard" className="text-muted hover:text-luxury text-xs font-black uppercase tracking-widest transition-colors">
+            ← Dashboard
           </Link>
         </div>
       </nav>
-      <main className="max-w-4xl mx-auto px-6 py-12">
-        <div className="mb-10 text-center animate-slide-up">
-          <h1 className="text-4xl font-black text-white mb-3 tracking-tight">Interview Complete! 🎉</h1>
-          {saving && <p className="text-razor-accent text-sm font-bold animate-pulse mt-2">💾 Auto-saving your results...</p>}
-          {saved && <p className="text-razor-green text-sm font-bold mt-2">✓ Results saved to your dashboard</p>}
-          <p className="text-slate-300 font-medium mt-1">Here is your detailed performance report.</p>
+
+      <main className="max-w-4xl mx-auto px-6 pt-32 pb-20">
+        <div className="mb-16 text-center animate-slide-up">
+          <h1 className="text-5xl md:text-6xl font-black text-luxury mb-4 tracking-tighter leading-tight">Mastery achieved.</h1>
+          <div className="flex items-center justify-center gap-4 mt-6">
+            {saving && <span className="text-[10px] font-black text-accent uppercase tracking-widest animate-pulse">💾 Archiving Session...</span>}
+            {saved && <span className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">✓ Successfully Vaulted</span>}
+          </div>
+          <p className="text-muted text-lg font-medium mt-4">Your detailed performance report is ready for review.</p>
         </div>
+
         <div className="animate-slide-up" style={{ animationDelay: '100ms' }}>
           <FinalReport
             report={report} role={role} difficulty={difficulty}
@@ -204,8 +203,8 @@ function ReportContent() {
 export default function ReportPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="w-14 h-14 border-4 border-razor-accent/30 border-t-razor-accent rounded-full animate-spin" />
+      <div className="min-h-screen bg-soft flex items-center justify-center">
+        <div className="w-14 h-14 border-4 border-luxury/20 border-t-luxury rounded-full animate-spin shadow-soft" />
       </div>
     }>
       <ReportContent />

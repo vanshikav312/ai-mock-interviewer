@@ -5,26 +5,38 @@
 @layer base {
   * { box-sizing: border-box; }
   body { 
-    background-color: #0E2C40;
-    color: #f8fafc;
+    @apply bg-soft text-slate-800 antialiased;
+    font-feature-settings: "cv02", "cv05", "cv11";
   }
 }
 
 @layer utilities {
-  .glass-panel {
-    @apply bg-[#1A4A5A]/50 backdrop-blur-lg border border-[#148D8D]/20 shadow-xl;
+  .soft-card {
+    @apply bg-white rounded-3xl shadow-soft border border-depth/30 transition-all duration-300;
   }
   
-  .glass-panel-solid {
-    @apply bg-[#1A4A5A] shadow-xl border border-[#148D8D]/30;
+  .soft-card-elevated {
+    @apply bg-white rounded-3xl shadow-elevated border border-depth/20 transition-all duration-300;
+  }
+
+  .pill-btn {
+    @apply rounded-pill font-bold tracking-tight transition-all duration-300 active:scale-[0.98];
+  }
+
+  .glass-panel {
+    @apply bg-white/70 backdrop-blur-md border border-white shadow-soft;
+  }
+
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
   }
 
   .animate-fade-in {
-    animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
   
   .animate-slide-up {
-    animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
 
   @keyframes fadeIn {
@@ -33,7 +45,7 @@
   }
 
   @keyframes slideUp {
-    from { opacity: 0; transform: translateY(20px); }
+    from { opacity: 0; transform: translateY(30px); }
     to { opacity: 1; transform: translateY(0); }
   }
 }

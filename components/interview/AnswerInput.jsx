@@ -8,42 +8,34 @@ export default function AnswerInput({
 }) {
   const wordCount = answer.trim() ? answer.trim().split(/\s+/).length : 0;
 
-  
- const handleTranscript = useCallback((transcript) => {
-  setAnswer(transcript);
-}, [setAnswer]);
+  const handleTranscript = useCallback((transcript) => {
+    setAnswer(transcript);
+  }, [setAnswer]);
+
   const { listening, supported: sttSupported, toggleListening, stopListening } =
     useSpeechToText({ onTranscript: handleTranscript });
 
-  // Stop mic when user submits
   const handleSubmit = () => {
     if (listening) stopListening();
     onSubmit();
   };
 
   return (
-    <div className="glass-panel rounded-2xl p-7 mb-8 transition-all duration-300 hover:border-razor-accent/40 hover:shadow-razor-accent/5 group">
-
+    <div className="soft-card p-10 animate-slide-up">
       {/* Header row */}
-      <div className="flex items-center justify-between mb-4">
-        <label className="text-slate-300 font-bold tracking-widest uppercase text-sm">
-          Your Answer
+      <div className="flex items-center justify-between mb-6">
+        <label className="text-[10px] font-black text-muted uppercase tracking-widest">
+          Draft your response
         </label>
         <div className="flex items-center gap-3">
-          {/* Listening badge */}
           {listening && (
-            <span className="flex items-center gap-1.5 text-xs font-bold text-red-400 bg-red-500/10 border border-red-500/30 px-3 py-1 rounded-full animate-pulse">
-              <span className="w-2 h-2 bg-red-400 rounded-full inline-block animate-ping" />
-              Listening...
+            <span className="flex items-center gap-2 text-[10px] text-red-600 font-black uppercase tracking-widest bg-red-50 px-4 py-2 rounded-pill shadow-inner-soft">
+              <span className="w-1.5 h-1.5 bg-red-600 rounded-full animate-ping" />
+              Recording
             </span>
           )}
-          {/* Word count badge */}
-          <span className={`text-xs font-bold px-3 py-1.5 rounded-full shadow-inner ${
-            wordCount < 20
-              ? 'bg-red-500/20 text-red-400 border border-red-500/30'
-              : wordCount < 60
-              ? 'bg-razor-peach/20 text-razor-peach border border-razor-peach/30'
-              : 'bg-razor-green/20 text-razor-green border border-razor-green/30'
+          <span className={`text-[10px] font-black px-4 py-2 rounded-pill shadow-inner-soft uppercase tracking-widest ${
+            wordCount < 20 ? 'text-red-600 bg-red-50' : wordCount < 60 ? 'text-accent bg-accent/5' : 'text-luxury bg-soft'
           }`}>
             {wordCount} words
           </span>
@@ -51,88 +43,64 @@ export default function AnswerInput({
       </div>
 
       {/* Textarea */}
-      <textarea
-        value={answer}
-        onChange={(e) => setAnswer(e.target.value)}
-        placeholder={
-          sttSupported
-            ? 'Type your answer here, or click the 🎙 mic button to speak...'
-            : 'Type your answer here... Be detailed and specific. Aim for at least 60 words.'
-        }
-        rows={7}
-        className={`w-full bg-razor-navy/60 border text-white rounded-xl px-5 py-4 focus:outline-none focus:ring-2 focus:ring-razor-accent/50 focus:border-razor-accent placeholder-slate-500 resize-none text-sm leading-relaxed transition-all duration-300 shadow-inner font-medium ${
-          listening
-            ? 'border-red-400/60 ring-2 ring-red-400/20'
-            : 'border-razor-teal/70'
-        }`}
-      />
+      <div className="relative group">
+        <textarea
+          value={answer}
+          onChange={(e) => setAnswer(e.target.value)}
+          placeholder={sttSupported ? 'Type your thoughts or use the mic to speak naturally...' : 'Type your detailed answer here...'}
+          rows={6}
+          className={`w-full bg-soft rounded-3xl px-8 py-6 text-luxury placeholder-muted/40 resize-none font-medium leading-relaxed transition-all shadow-inner-soft border-2 outline-none ${
+            listening ? 'border-red-200 ring-4 ring-red-50' : 'border-transparent focus:border-luxury/10 focus:bg-white focus:shadow-soft'
+          }`}
+        />
+        {listening && <div className="absolute inset-0 rounded-3xl pointer-events-none animate-pulse ring-4 ring-red-500/10" />}
+      </div>
 
       {/* Error message */}
       {error && (
-        <div className="mt-4 p-4 bg-red-500/10 border border-red-500/30 rounded-xl flex items-start gap-3 animate-in fade-in slide-in-from-top-2 shadow-inner">
-          <span className="text-red-400 text-lg mt-0.5">⚠️</span>
-          <div>
-            <h4 className="text-red-400 font-bold text-sm tracking-wide">Submission Failed</h4>
-            <p className="text-red-300 text-xs mt-1 leading-relaxed font-medium">{error}</p>
-          </div>
+        <div className="mt-6 p-6 bg-red-50 border border-red-100 rounded-2xl flex items-start gap-4 animate-slide-up">
+          <span className="text-xl opacity-20">•</span>
+          <p className="text-red-700 text-xs font-bold leading-relaxed">{error}</p>
         </div>
       )}
 
       {/* Button row */}
-      <div className="flex gap-3 mt-6">
-
-        {/* Mic button — only shown if browser supports STT */}
+      <div className="flex flex-wrap gap-4 mt-8">
         {sttSupported && (
           <button
             onClick={toggleListening}
             disabled={loading}
-            title={listening ? 'Stop recording' : 'Speak your answer'}
-            className={`flex items-center justify-center w-14 h-14 rounded-xl border font-bold text-xl transition-all duration-300 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0 ${
-              listening
-                ? 'bg-red-500/30 border-red-400/60 text-red-300 shadow-red-500/20 animate-pulse'
-                : 'bg-razor-teal/40 hover:bg-razor-teal/70 border-razor-accent/30 hover:border-red-400/50 text-slate-300 hover:text-red-300'
+            className={`w-16 h-16 rounded-full flex items-center justify-center text-2xl transition-all shadow-soft border-2 ${
+              listening ? 'bg-red-500 border-red-400 text-white animate-pulse scale-110' : 'bg-[#0F3D2E] border-white/10 text-white hover:bg-[#1F7A63]'
             }`}
           >
             {listening ? '⏹' : '🎙'}
           </button>
         )}
 
-        {/* Hint button */}
         <button
           onClick={onHint}
           disabled={hintLoading || loading}
-          className="flex items-center justify-center min-w-[130px] gap-2 px-5 py-3.5 bg-razor-teal/40 hover:bg-razor-teal/70 border border-razor-accent/30 hover:border-razor-peach/50 text-slate-300 hover:text-razor-peach rounded-xl text-sm font-bold transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed group shadow-sm"
+          className="pill-btn flex-1 min-w-[160px] bg-white border-2 border-depth/30 text-luxury hover:bg-soft shadow-soft flex items-center justify-center gap-2 text-sm font-black tracking-widest uppercase disabled:opacity-50"
         >
-          {hintLoading ? (
-            <span className="animate-pulse tracking-wide">Getting hint...</span>
-          ) : (
-            <><span className="group-hover:scale-110 transition-transform">💡</span> Get Hint</>
-          )}
+          {hintLoading ? 'Tuning hints...' : <><span className="text-lg">💡</span> Get Hint</>}
         </button>
 
-        {/* Submit button */}
         <button
           onClick={handleSubmit}
           disabled={loading || !answer.trim() || hintLoading}
-          className="flex-1 bg-razor-peach hover:bg-razor-peach/90 disabled:opacity-50 disabled:cursor-not-allowed text-razor-navy font-black py-3.5 rounded-xl text-sm shadow-lg shadow-razor-peach/20 hover:shadow-razor-peach/40 transition-all duration-300 transform active:scale-[0.98] tracking-widest uppercase"
+          className="pill-btn flex-[2] min-w-[200px] bg-accent text-white py-5 shadow-soft hover:shadow-elevated hover:-translate-y-1 text-sm font-black tracking-widest uppercase disabled:opacity-50 transition-all flex items-center justify-center gap-3"
         >
           {loading ? (
-            <span className="flex items-center justify-center gap-3">
-              <div className="w-5 h-5 border-2 border-razor-navy/30 border-t-razor-navy rounded-full animate-spin" />
-              Evaluating...
-            </span>
-          ) : (
-            'Submit Answer 🚀'
-          )}
+            <>
+              <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+              Analyzing...
+            </>
+          ) : 'Submit Answer'}
         </button>
       </div>
 
-      {/* STT not supported notice */}
-      {!sttSupported && (
-        <p className="text-slate-500 text-xs mt-3 text-center">
-          🎙 Voice input requires Chrome or Edge browser
-        </p>
-      )}
+      {!sttSupported && <p className="text-muted text-[10px] font-bold mt-4 text-center opacity-40 uppercase tracking-widest">Voice input available on Chrome & Edge</p>}
     </div>
   );
 }

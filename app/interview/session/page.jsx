@@ -36,7 +36,6 @@ function SessionContent() {
     if (status === 'unauthenticated') router.push('/login');
   }, [status, router]);
 
-  // Bulk fetch all questions on mount
   useEffect(() => {
     if (status === 'loading') return;
 
@@ -75,7 +74,6 @@ function SessionContent() {
 
   const currentQuestion = questions[currentIndex] || '';
 
-  // Auto-speak question when it changes
   useEffect(() => {
     if (currentQuestion && !loadingQuestions) {
       speak(currentQuestion);
@@ -146,18 +144,12 @@ function SessionContent() {
     const nextIndex = currentIndex + 1;
 
     if (nextIndex >= totalQuestions) {
-      // Store in sessionStorage to avoid HTTP 431 (URL too long)
       const dataToSave = allQAsRef.current;
-      console.log('Saving to sessionStorage, QAs count:', dataToSave.length, dataToSave);
       sessionStorage.setItem('interviewQAs', JSON.stringify(dataToSave));
-      // Verify it was saved
-      const verify = sessionStorage.getItem('interviewQAs');
-      console.log('Verified sessionStorage:', verify ? 'SET' : 'EMPTY');
       router.push(`/interview/report?role=${encodeURIComponent(role)}&difficulty=${encodeURIComponent(difficulty)}`);
       return;
     }
 
-    // Pre-loaded question — instant transition, no API call
     if (questions[nextIndex]) {
       setCurrentIndex(nextIndex);
       setAnswer('');
@@ -169,7 +161,6 @@ function SessionContent() {
       return;
     }
 
-    // Fallback: fetch next question individually
     setLoadingQuestions(true);
     fetch('/api/interview/generate-question', {
       method: 'POST',
@@ -205,45 +196,58 @@ function SessionContent() {
 
   if (status === 'loading' || loadingQuestions) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-5">
-        <div className="w-14 h-14 border-4 border-razor-accent/30 border-t-razor-accent rounded-full animate-spin shadow-[0_0_15px_rgba(20,141,141,0.5)]" />
-        <p className="text-razor-accent font-bold tracking-wide animate-pulse">
-          {loadingQuestions ? 'Preparing your interview questions...' : 'Loading session...'}
-        </p>
+      <div className="min-h-screen bg-soft flex flex-col items-center justify-center gap-6">
+        <div className="w-16 h-16 border-4 border-luxury/10 border-t-luxury rounded-full animate-spin shadow-soft" />
+        <div className="text-center space-y-2">
+          <p className="text-luxury font-black tracking-widest text-xs uppercase animate-pulse">
+            {loadingQuestions ? 'Building your scenario...' : 'Entering space...'}
+          </p>
+          <p className="text-muted text-sm font-medium italic opacity-60">"Preparing a deep technical experience for you."</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen animate-fade-in">
-      <nav className="border-b border-razor-teal bg-razor-navy/90 backdrop-blur-md sticky top-0 z-20 shadow-sm">
-        <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
-          <span className="text-2xl font-black text-white tracking-tight flex items-center gap-2">
-            <span>🤖</span> AI <span className="text-razor-accent">Interviewer</span>
-          </span>
-          <div className="flex items-center gap-3">
-            <span className="text-slate-300 text-sm font-bold hidden sm:block">{role}</span>
-            <span className="bg-razor-teal/50 text-razor-green text-xs font-bold px-3 py-1.5 rounded-full border border-razor-accent/30 shadow-inner">
-              {difficulty}
-            </span>
+    <div className="min-h-screen bg-soft selection:bg-luxury/10">
+      {/* Floating Navigation */}
+      <nav className="fixed top-6 left-1/2 -translate-x-1/2 z-50 w-[90%] max-w-4xl">
+        <div className="glass-panel px-8 py-4 rounded-pill flex items-center justify-between shadow-soft border border-depth/20">
+          <div className="flex items-center gap-6">
+            <img src="/logo.png" alt="Logo" className="w-16 h-16 object-contain" />
+            <div className="hidden md:block h-8 w-px bg-depth/30" />
+            <div className="hidden md:flex items-center gap-3">
+              <span className="text-[10px] font-black uppercase tracking-widest text-muted">Role Path</span>
+              <span className="text-sm font-bold text-luxury">{role}</span>
+            </div>
+          </div>
+          <div className="flex items-center gap-4">
+            <div className="bg-luxury/5 border border-depth/30 px-4 py-1.5 rounded-pill shadow-inner-soft">
+              <span className="text-[10px] font-black text-luxury tracking-widest">{currentIndex + 1} of {totalQuestions}</span>
+            </div>
+            <button onClick={() => router.push('/dashboard')} className="text-muted hover:text-luxury text-[10px] font-black uppercase tracking-widest px-2 transition-colors">
+              Quit
+            </button>
           </div>
         </div>
       </nav>
 
-      <main className="max-w-3xl mx-auto px-6 py-8">
-        <QuestionCard
-          question={currentQuestion}
-          questionNumber={currentIndex + 1}
-          totalQuestions={totalQuestions}
-          onReplay={() => speak(currentQuestion)}
-          speaking={speaking}
-          muted={muted}
-          onToggleMute={toggleMute}
-          ttsSupported={ttsSupported}
-        />
+      <main className="max-w-4xl mx-auto px-6 pt-32 pb-20">
+        <div className="animate-slide-up">
+          <QuestionCard
+            question={currentQuestion}
+            questionNumber={currentIndex + 1}
+            totalQuestions={totalQuestions}
+            onReplay={() => speak(currentQuestion)}
+            speaking={speaking}
+            muted={muted}
+            onToggleMute={toggleMute}
+            ttsSupported={ttsSupported}
+          />
+        </div>
 
         {phase === 'answering' && (
-          <>
+          <div className="mt-8 space-y-8 animate-slide-up" style={{ animationDelay: '100ms' }}>
             <HintBox hint={hint} loading={loadingHint} />
             <AnswerInput
               answer={answer}
@@ -254,15 +258,17 @@ function SessionContent() {
               hintLoading={loadingHint}
               error={error}
             />
-          </>
+          </div>
         )}
 
         {phase === 'scored' && (
-          <ScoreCard
-            evaluation={evaluation}
-            onNext={handleNext}
-            isLast={currentIndex + 1 >= totalQuestions}
-          />
+          <div className="mt-8 animate-slide-up" style={{ animationDelay: '100ms' }}>
+            <ScoreCard
+              evaluation={evaluation}
+              onNext={handleNext}
+              isLast={currentIndex + 1 >= totalQuestions}
+            />
+          </div>
         )}
       </main>
     </div>
@@ -272,8 +278,8 @@ function SessionContent() {
 export default function SessionPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="w-14 h-14 border-4 border-razor-accent/30 border-t-razor-accent rounded-full animate-spin shadow-[0_0_15px_rgba(20,141,141,0.5)]" />
+      <div className="min-h-screen bg-soft flex items-center justify-center">
+        <div className="w-14 h-14 border-4 border-luxury/20 border-t-luxury rounded-full animate-spin shadow-soft" />
       </div>
     }>
       <SessionContent />

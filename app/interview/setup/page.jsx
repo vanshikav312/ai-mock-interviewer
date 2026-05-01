@@ -30,48 +30,62 @@ export default function SetupPage() {
   };
 
   return (
-    <div className="min-h-screen animate-fade-in">
-      <nav className="border-b border-razor-teal bg-razor-navy/90 backdrop-blur-md sticky top-0 z-20 shadow-sm">
-        <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link href="/dashboard" className="text-2xl font-black text-white tracking-tight flex items-center gap-2">
-            <span>🤖</span> AI <span className="text-razor-accent">Interviewer</span>
+    <div className="min-h-screen bg-soft selection:bg-luxury/10">
+      {/* Floating Navigation */}
+      <nav className="fixed top-6 left-1/2 -translate-x-1/2 z-50 w-[90%] max-w-4xl">
+        <div className="glass-panel px-8 py-4 rounded-pill flex items-center justify-between shadow-soft border border-depth/20">
+          <Link href="/dashboard" className="flex items-center gap-3">
+            <img src="/logo.png" alt="Logo" className="w-16 h-16 object-contain" />
+            <span className="font-black text-luxury tracking-tighter text-xl">AI Mock Interviewer</span>
           </Link>
-          <Link href="/dashboard" className="text-slate-400 hover:text-white text-sm font-bold transition-colors">
-            ← Back to Dashboard
+          <Link href="/dashboard" className="text-muted hover:text-luxury text-xs font-black uppercase tracking-widest transition-colors">
+            ← Dashboard
           </Link>
         </div>
       </nav>
 
-      <main className="max-w-3xl mx-auto px-6 py-12">
-        <div className="mb-10 text-center animate-slide-up">
-          <h1 className="text-4xl font-black text-white mb-3 tracking-tight">Configure Interview ⚙️</h1>
-          <p className="text-slate-300 font-medium">Customize your practice session.</p>
+      <main className="max-w-4xl mx-auto px-6 pt-32 pb-20">
+        <div className="mb-16 text-center animate-slide-up">
+          <h1 className="text-5xl md:text-6xl font-black text-luxury mb-4 tracking-tighter">Set your stage.</h1>
+          <p className="text-muted text-lg font-medium">Configure your session for deep technical growth.</p>
         </div>
 
-        <div className="glass-panel p-8 mb-8 animate-slide-up" style={{ animationDelay: '100ms' }}>
-          <RoleSelector config={config} setConfig={setConfig} />
-        </div>
-
-        <div className="bg-razor-teal/30 border border-razor-accent/30 rounded-2xl p-6 mb-8 flex items-center gap-5 shadow-inner backdrop-blur-sm animate-slide-up" style={{ animationDelay: '200ms' }}>
-          <div className="w-14 h-14 bg-razor-navy/50 border border-razor-teal rounded-xl flex items-center justify-center text-3xl shadow-inner">📋</div>
-          <div>
-            <p className="text-white font-bold text-lg mb-1">
-              {config.questionCount} {config.role} questions • {config.difficulty}
-            </p>
-            <p className="text-razor-green font-medium text-sm">⏱️ Estimated time: ~{config.questionCount * 3} minutes</p>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+          {/* Main Config Card */}
+          <div className="lg:col-span-8 animate-slide-up" style={{ animationDelay: '100ms' }}>
+            <div className="soft-card p-10 !bg-[#0F3D2E] text-white">
+              <RoleSelector config={config} setConfig={setConfig} />
+            </div>
           </div>
-        </div>
 
-        <div className="animate-slide-up" style={{ animationDelay: '300ms' }}>
-          <button onClick={handleStart} disabled={starting}
-            className="w-full bg-razor-peach hover:bg-razor-peach/90 disabled:opacity-50 disabled:cursor-not-allowed text-razor-navy font-black text-xl py-5 rounded-2xl transition-all duration-300 shadow-lg shadow-razor-peach/20 hover:shadow-razor-peach/40 transform hover:-translate-y-1">
-            {starting ? (
-              <span className="flex items-center justify-center gap-3">
-                <div className="w-6 h-6 border-4 border-razor-navy/30 border-t-razor-navy rounded-full animate-spin" />
-                Preparing Environment...
-              </span>
-            ) : '🚀 Start Interview Now'}
-          </button>
+          {/* Info & CTA Panel */}
+          <div className="lg:col-span-4 space-y-8 animate-slide-up" style={{ animationDelay: '200ms' }}>
+            <div className="soft-card-elevated !bg-[#0F3D2E] p-8 text-white">
+              <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center text-2xl mb-6 shadow-inner border border-white/5 opacity-20">•</div>
+              <h3 className="text-xl font-black mb-2 tracking-tight">Session Summary</h3>
+              <p className="text-white/60 text-sm leading-relaxed mb-6 font-medium">
+                Your <span className="text-accent">{config.questionCount} question</span> session for <span className="text-accent">{config.role}</span> is ready.
+              </p>
+              <div className="pt-6 border-t border-white/10">
+                <p className="text-[10px] font-black uppercase tracking-widest text-white/40 mb-1">Estimated Intensity</p>
+                <div className="flex gap-1">
+                  {[1, 2, 3, 4, 5].map(i => (
+                    <div key={i} className={`h-1 flex-1 rounded-full ${i <= (config.difficulty === 'Hard' ? 5 : config.difficulty === 'Medium' ? 3 : 1) ? 'bg-accent' : 'bg-white/10'}`} />
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <button onClick={handleStart} disabled={starting}
+              className="w-full pill-btn bg-accent text-white py-6 text-xl shadow-soft hover:shadow-elevated hover:-translate-y-1 disabled:opacity-50 transition-all flex items-center justify-center gap-3">
+              {starting ? (
+                <>
+                  <div className="w-6 h-6 border-4 border-white/20 border-t-white rounded-full animate-spin" />
+                  Building...
+                </>
+              ) : 'Start Interview'}
+            </button>
+          </div>
         </div>
       </main>
     </div>

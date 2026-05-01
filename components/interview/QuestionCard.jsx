@@ -7,68 +7,75 @@ export default function QuestionCard({
   const progress = (questionNumber / totalQuestions) * 100;
 
   return (
-    <div className="glass-panel rounded-2xl p-7 mb-8 animate-slide-up">
+    <div className="soft-card-elevated p-10 animate-slide-up relative overflow-hidden group">
+      {/* Decorative side accent */}
+      <div className="absolute left-0 top-0 bottom-0 w-2 bg-luxury opacity-10 group-hover:opacity-100 transition-opacity" />
 
       {/* Top row: progress label + mute toggle */}
-      <div className="flex items-center justify-between mb-5">
-        <span className="text-sm text-slate-300 font-bold tracking-widest uppercase">
-          Question {questionNumber} of {totalQuestions}
-        </span>
-        <div className="flex items-center gap-2">
-          {/* Speaking indicator */}
+      <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-2xl bg-luxury flex items-center justify-center text-white font-black text-xs shadow-soft">
+            {questionNumber}
+          </div>
+          <span className="text-[10px] font-black text-muted uppercase tracking-widest">
+            Question of {totalQuestions}
+          </span>
+        </div>
+        
+        <div className="flex items-center gap-3">
           {speaking && (
-            <span className="flex items-center gap-1.5 text-xs text-razor-accent font-bold bg-razor-accent/10 border border-razor-accent/30 px-3 py-1 rounded-full animate-pulse">
-              <span className="w-2 h-2 bg-razor-accent rounded-full animate-ping inline-block" />
-              Speaking...
+            <span className="flex items-center gap-2 text-[10px] text-luxury font-black uppercase tracking-widest bg-soft px-4 py-2 rounded-pill shadow-inner-soft">
+              <span className="w-1.5 h-1.5 bg-luxury rounded-full animate-ping" />
+              Speaking
             </span>
           )}
-          {/* Mute toggle */}
           {ttsSupported && (
             <button
               onClick={onToggleMute}
-              title={muted ? 'Unmute AI voice' : 'Mute AI voice'}
-              className={`text-lg px-3 py-1.5 rounded-xl border transition-all duration-200 ${
+              className={`w-10 h-10 rounded-full flex items-center justify-center transition-all shadow-soft border ${
                 muted
-                  ? 'bg-red-500/20 border-red-500/40 text-red-400 hover:bg-red-500/30'
-                  : 'bg-razor-teal/40 border-razor-accent/30 text-razor-accent hover:bg-razor-teal/70'
+                  ? 'bg-red-50 border-red-100 text-white'
+                  : 'bg-white border-depth/30 text-luxury hover:bg-soft'
               }`}
             >
-              {muted ? '🔇' : '🔊'}
+              {muted ? 'Muted' : 'Sound'}
             </button>
           )}
-          {/* Completion badge */}
-          <span className="text-sm text-razor-green font-bold bg-razor-green/10 px-4 py-1.5 rounded-full border border-razor-green/20 shadow-inner">
-            {Math.round(progress)}% complete
-          </span>
         </div>
       </div>
 
-      {/* Progress bar */}
-      <div className="w-full bg-razor-navy/60 rounded-full h-3 mb-8 shadow-inner overflow-hidden border border-razor-teal/50">
-        <div
-          className="bg-razor-accent h-3 rounded-full transition-all duration-700 ease-out shadow-[0_0_12px_rgba(20,141,141,0.6)]"
-          style={{ width: `${progress}%` }}
-        />
-      </div>
-
       {/* Question text */}
-      <div className="bg-razor-navy/40 rounded-2xl p-7 border border-razor-teal shadow-inner backdrop-blur-sm">
-        <p className="text-white text-xl leading-relaxed font-semibold animate-fade-in">
+      <div className="mb-12">
+        <h2 className="text-2xl md:text-3xl font-black text-luxury leading-tight tracking-tighter">
           {question}
-        </p>
+        </h2>
       </div>
 
-      {/* Replay button */}
-      {ttsSupported && onReplay && (
-        <button
-          onClick={onReplay}
-          disabled={speaking}
-          className="mt-4 flex items-center gap-2 text-sm text-razor-accent hover:text-white font-bold transition-colors duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
-        >
-          <span className="text-base">{speaking ? '🔉' : '🔁'}</span>
-          {speaking ? 'Reading question...' : 'Replay question'}
-        </button>
-      )}
+      {/* Bottom row: Progress & Replay */}
+      <div className="flex flex-col sm:flex-row items-center gap-8 pt-8 border-t border-depth/30">
+        <div className="flex-1 w-full space-y-2">
+          <div className="flex justify-between text-[10px] font-black text-muted uppercase tracking-widest">
+            <span>Progress</span>
+            <span>{Math.round(progress)}%</span>
+          </div>
+          <div className="h-1.5 w-full bg-soft rounded-full overflow-hidden shadow-inner-soft">
+            <div
+              className="bg-luxury h-full rounded-full transition-all duration-1000 ease-out"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+        </div>
+
+        {ttsSupported && onReplay && (
+          <button
+            onClick={onReplay}
+            disabled={speaking}
+            className="flex-shrink-0 pill-btn bg-soft text-luxury px-6 py-3 text-[10px] uppercase font-black tracking-widest border border-depth/30 hover:bg-depth/20 disabled:opacity-40"
+          >
+            {speaking ? 'Reading...' : 'Replay'}
+          </button>
+        )}
+      </div>
     </div>
   );
 }
