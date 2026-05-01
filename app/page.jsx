@@ -39,14 +39,6 @@ export default function HomePage() {
             <Link href="/register" className="pill-btn bg-accent text-white px-12 py-5 text-lg shadow-soft hover:shadow-elevated hover:-translate-y-1">
               Start Free Trial
             </Link>
-            <div className="flex -space-x-3 items-center ml-4">
-              {[1, 2, 3, 4].map(i => (
-                <div key={i} className="w-10 h-10 rounded-full border-2 border-soft bg-depth flex items-center justify-center text-xs font-bold overflow-hidden">
-                  <img src={`https://i.pravatar.cc/100?u=${i}`} alt="user" />
-                </div>
-              ))}
-              <span className="pl-6 text-sm font-bold text-muted">+12k practicing now</span>
-            </div>
           </div>
         </div>
 
