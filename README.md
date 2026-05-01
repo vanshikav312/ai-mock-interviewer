@@ -2,7 +2,7 @@
 
  A production-grade AI mock interview platform with voice, streaming, multi-provider AI routing, NLP scoring, and persistent analytics.
 
-**Live Demo → [ai-mock-interviewer-umber.vercel.app](ai-mock-interviewer-umber.vercel.app)**  
+**Live Demo → [ai-mock-interviewer-umber.vercel.app](https://ai-mock-interviewer-umber.vercel.app)**  
 **GitHub → [github.com/vanshikav312/ai-mock-interviewer](https://github.com/vanshikav312/ai-mock-interviewer)**
 
 > Voice features require **Chrome or Edge** browser.
