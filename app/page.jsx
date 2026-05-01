@@ -10,14 +10,14 @@ export default function HomePage() {
             <img src="/logo.png" alt="Logo" className="w-16 h-16 object-contain" />
             <span className="font-black text-luxury tracking-tighter text-xl">AI Mock Interviewer</span>
           </div>
-          <div className="hidden md:flex items-center gap-8">
-            <Link href="#features" className="text-sm font-bold text-muted hover:text-luxury transition-colors">Features</Link>
-            <Link href="#how-it-works" className="text-sm font-bold text-muted hover:text-luxury transition-colors">Methodology</Link>
-            <Link href="/login" className="text-sm font-bold text-luxury bg-depth/30 px-6 py-2 rounded-pill hover:bg-depth/50 transition-all">Sign In</Link>
+          <div className="flex items-center gap-8">
+            <div className="hidden md:flex items-center gap-8">
+              <Link href="#features" className="text-sm font-bold text-muted hover:text-luxury transition-colors">Features</Link>
+            </div>
+            <Link href="/register" className="pill-btn bg-luxury text-white px-8 py-2.5 text-sm shadow-soft hover:shadow-elevated hover:-translate-y-0.5">
+              Sign Up
+            </Link>
           </div>
-          <Link href="/register" className="pill-btn bg-luxury text-white px-8 py-2.5 text-sm shadow-soft hover:shadow-elevated hover:-translate-y-0.5">
-            Join Now
-          </Link>
         </div>
       </nav>
 
@@ -136,9 +136,6 @@ export default function HomePage() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
             <Link href="/register" className="pill-btn bg-luxury text-white px-12 py-5 text-lg shadow-soft hover:shadow-elevated hover:-translate-y-1">
               Create My Account
-            </Link>
-            <Link href="/login" className="text-luxury font-black text-lg hover:underline decoration-accent underline-offset-8">
-              Sign into existing account →
             </Link>
           </div>
         </div>

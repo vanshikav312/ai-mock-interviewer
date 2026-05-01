@@ -46,6 +46,11 @@ export default function DashboardPage() {
   const recentSessions = sessions.slice(0, 5);
   const firstName = session?.user?.name?.split(' ')[0] || 'Explorer';
 
+  const avgScore = sessions.length > 0 
+    ? Math.round(sessions.reduce((acc, s) => acc + s.overallScore, 0) / sessions.length)
+    : 0;
+  const lastRole = sessions[0]?.role || 'New Explorer';
+
   return (
     <div className="min-h-screen bg-soft selection:bg-luxury/10">
       {/* Floating Navigation */}
@@ -110,7 +115,7 @@ export default function DashboardPage() {
                 <span className="text-[10px] font-black bg-emerald-50 text-emerald-600 px-2 py-1 rounded-md border border-emerald-100">+12%</span>
               </div>
               <p className="text-muted text-xs font-black uppercase tracking-widest mb-1">Avg. Score</p>
-              <p className="text-3xl font-black text-luxury">84/100</p>
+              <p className="text-3xl font-black text-luxury">{avgScore}/100</p>
             </div>
             <div className="soft-card p-8 hover:-translate-y-1 transition-all">
               <div className="flex justify-between items-start mb-6">
@@ -118,7 +123,7 @@ export default function DashboardPage() {
                 <span className="text-[10px] font-black bg-accent/5 text-accent px-2 py-1 rounded-md border border-accent/10">Active</span>
               </div>
               <p className="text-muted text-xs font-black uppercase tracking-widest mb-1">Role Path</p>
-              <p className="text-2xl font-black text-luxury">Senior Architect</p>
+              <p className="text-2xl font-black text-luxury">{lastRole}</p>
             </div>
           </div>
         </div>
