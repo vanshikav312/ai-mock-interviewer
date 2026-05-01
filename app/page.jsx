@@ -103,7 +103,9 @@ export default function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
             <div className="md:col-span-7 soft-card p-12 !bg-[#0F3D2E] text-white flex flex-col justify-between group hover:-translate-y-1">
               <div>
-                <div className="w-16 h-16 rounded-3xl bg-white/10 flex items-center justify-center text-4xl mb-8 border border-white/10 opacity-20">•</div>
+                <div className="w-16 h-16 rounded-3xl bg-white flex items-center justify-center mb-8 border border-white/10 shadow-soft overflow-hidden">
+                  <img src="/feature_dynamic.png" alt="Dynamic AI" className="w-full h-full object-cover" />
+                </div>
                 <h3 className="text-4xl font-black mb-4 tracking-tighter">Dynamic AI Architect</h3>
                 <p className="text-white/60 text-lg font-medium leading-relaxed max-w-md">Gemini-powered questions that adapt to your role, level, and performance in real-time.</p>
               </div>
@@ -116,14 +118,18 @@ export default function HomePage() {
 
             <div className="md:col-span-5 space-y-8">
               <div className="soft-card p-10 !bg-[#0F3D2E] text-white hover:-translate-y-1 group">
-                <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center text-2xl mb-6 shadow-inner-soft border border-white/10 group-hover:bg-white group-hover:text-luxury transition-all opacity-20">•</div>
+                <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center mb-6 shadow-inner-soft border border-white/10 overflow-hidden">
+                  <img src="/feature_metrics.png" alt="Metrics" className="w-full h-full object-cover" />
+                </div>
                 <h3 className="text-xl font-bold text-white mb-2 tracking-tight">Deep Score Metrics</h3>
                 <p className="text-white/60 text-sm leading-relaxed font-medium">Multidimensional analysis across clarity, relevance, and technical depth.</p>
               </div>
               <div className="soft-card p-10 !bg-[#0F3D2E] text-white hover:-translate-y-1 group">
-                <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center text-2xl mb-6 shadow-inner-soft border border-white/10 group-hover:bg-white group-hover:text-luxury transition-all opacity-20">•</div>
-                <h3 className="text-xl font-bold text-white mb-2 tracking-tight">Voice First Design</h3>
-                <p className="text-white/60 text-sm leading-relaxed font-medium">Practice speaking naturally with integrated Web Speech API interactions.</p>
+                <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center mb-6 shadow-inner-soft border border-white/10 overflow-hidden">
+                  <img src="/feature_voice.png" alt="Voice" className="w-full h-full object-cover" />
+                </div>
+                <h3 className="text-xl font-bold text-white mb-2 tracking-tight">Hear the Question. Say Your Answer.</h3>
+                <p className="text-white/60 text-sm leading-relaxed font-medium">Practice speaking by answering questions out loud, just like in a real interview.</p>
               </div>
             </div>
           </div>
