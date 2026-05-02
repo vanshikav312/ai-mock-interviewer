@@ -61,9 +61,9 @@ export default function DashboardPage() {
             <span className="font-black text-luxury tracking-tighter text-xl">AI Mock Interviewer</span>
           </Link>
           <div className="flex items-center gap-4">
-            <div className="hidden sm:flex items-center gap-2 bg-luxury/5 px-4 py-2 rounded-pill border border-depth/30">
+            <Link href="/profile" className="hidden sm:flex items-center gap-2 bg-luxury/5 px-4 py-2 rounded-pill border border-depth/30 hover:bg-luxury/10 transition-colors">
               <span className="text-luxury text-sm font-black tracking-tight">{firstName}</span>
-            </div>
+            </Link>
             <button onClick={() => signOut({ callbackUrl: '/' })} className="text-muted hover:text-luxury text-xs font-black uppercase tracking-widest px-4 transition-colors">
               Exit
             </button>
@@ -145,7 +145,7 @@ export default function DashboardPage() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {recentSessions.map((s, i) => (
-                <div key={s._id} className="soft-card p-8 !bg-[#0F3D2E] text-white hover:-translate-y-1 group relative overflow-hidden shadow-xl">
+                <Link key={s._id} href={`/interview/report?id=${s._id}`} className="block soft-card p-8 !bg-[#0F3D2E] text-white hover:-translate-y-1 group relative overflow-hidden shadow-xl">
                   <div className="flex justify-between items-start mb-8 relative z-10">
                     <div>
                       <p className="text-white font-black text-xl mb-1 group-hover:text-accent transition-colors">{s.role}</p>
@@ -166,12 +166,12 @@ export default function DashboardPage() {
                     <span className={`text-[10px] font-black px-3 py-1 rounded-md border uppercase tracking-tighter ${VERDICT_COLORS[s.hiringVerdict] || 'text-white/60 bg-white/10 border-white/10'}`}>
                       {s.hiringVerdict || 'N/A'}
                     </span>
-                    <Link href={`/interview/report?id=${s._id}`} className="text-[10px] font-black uppercase tracking-widest text-white group-hover:underline">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-white group-hover:underline">
                       Analysis →
-                    </Link>
+                    </span>
                   </div>
                   <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16 group-hover:scale-110 transition-transform duration-500 -z-0" />
-                </div>
+                </Link>
               ))}
             </div>
           )}

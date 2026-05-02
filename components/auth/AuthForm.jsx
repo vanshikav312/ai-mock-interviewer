@@ -16,6 +16,13 @@ export default function AuthForm({ mode }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(form.email)) {
+      setError('Enter a valid email');
+      return;
+    }
+
     setLoading(true);
     try {
       if (isLogin) {

@@ -10,8 +10,12 @@ function ReportContent() {
   const router = useRouter();
   const params = useSearchParams();
 
-  const role = params.get('role') || 'Software Engineer';
-  const difficulty = params.get('difficulty') || 'Medium';
+  const id = params.get('id');
+  const roleParam = params.get('role') || 'Software Engineer';
+  const difficultyParam = params.get('difficulty') || 'Medium';
+
+  const [role, setRole] = useState(roleParam);
+  const [difficulty, setDifficulty] = useState(difficultyParam);
 
   const [rawQas, setRawQas] = useState(null);
   const [report, setReport] = useState(null);
@@ -26,17 +30,38 @@ function ReportContent() {
   }, [status, router]);
 
   useEffect(() => {
-    const stored = sessionStorage.getItem('interviewQAs');
-    if (stored) {
-      setRawQas(stored);
+    if (id) {
+      fetch(`/api/sessions/${id}`)
+        .then((r) => r.json())
+        .then((data) => {
+          if (data.session) {
+            setReport(data.session.finalReport);
+            setRole(data.session.role || roleParam);
+            setDifficulty(data.session.difficulty || difficultyParam);
+            setSaved(true);
+            setLoading(false);
+          } else {
+            setError(data.error || 'Report not found.');
+            setLoading(false);
+          }
+        })
+        .catch(() => {
+          setError('Failed to fetch report.');
+          setLoading(false);
+        });
     } else {
-      setError('No interview data found.');
-      setLoading(false);
+      const stored = sessionStorage.getItem('interviewQAs');
+      if (stored) {
+        setRawQas(stored);
+      } else {
+        setError('No interview data found.');
+        setLoading(false);
+      }
     }
-  }, []);
+  }, [id, roleParam, difficultyParam]);
 
   useEffect(() => {
-    if (!rawQas) return;
+    if (id || !rawQas) return;
 
     let allQAs;
     try {
@@ -140,7 +165,7 @@ function ReportContent() {
     }
   };
 
-  if (status === 'loading' || loading || (rawQas === null && !error)) {
+  if (status === 'loading' || loading || (!id && rawQas === null && !error)) {
     return (
       <div className="min-h-screen bg-soft flex flex-col items-center justify-center gap-6">
         <div className="w-16 h-16 border-4 border-luxury/10 border-t-luxury rounded-full animate-spin shadow-soft" />
