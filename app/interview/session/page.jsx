@@ -44,6 +44,12 @@ function SessionContent() {
   }, [status, router]);
 
   useEffect(() => {
+    if (tabSwitchCount > 2) {
+      router.push('/interview/setup?error=tab_switch');
+    }
+  }, [tabSwitchCount, router]);
+
+  useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.hidden && phase === 'answering') {
         setTabSwitchCount((prev) => {

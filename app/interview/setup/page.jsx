@@ -15,10 +15,21 @@ export default function SetupPage() {
   });
   const [jobDescription, setJobDescription] = useState('');
   const [starting, setStarting] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
 
   useEffect(() => {
     if (status === 'unauthenticated') router.push('/login');
   }, [status, router]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('error') === 'tab_switch') {
+        setErrorMsg('Due to excessive tab switching, your interview session was terminated.');
+        window.history.replaceState(null, '', '/interview/setup');
+      }
+    }
+  }, []);
 
   const handleStart = () => {
     setStarting(true);
@@ -49,6 +60,11 @@ export default function SetupPage() {
       </nav>
 
       <main className="max-w-4xl mx-auto px-6 pt-32 pb-20">
+        {errorMsg && (
+          <div className="mb-8 p-4 bg-red-500/10 border-2 border-red-500 rounded-xl text-red-500 text-center font-bold animate-slide-up">
+            🚨 {errorMsg}
+          </div>
+        )}
         <div className="mb-16 text-center animate-slide-up">
           <h1 className="text-5xl md:text-6xl font-black text-luxury mb-4 tracking-tighter">Set your stage.</h1>
           <p className="text-muted text-lg font-medium">Configure your session for deep technical growth.</p>
@@ -104,6 +120,50 @@ in distributed systems, Redis, and payment processing..."
                   {jobDescription.length}/2000
                 </span>
               </div>
+            </div>
+
+            {/* Interview Rules Box */}
+            <div className="rounded-2xl p-6 mt-6 border-2 border-red-500/30 bg-red-500/5 shadow-inner-soft">
+              <div className="flex items-center gap-3 mb-4">
+                <span className="text-2xl">🚨</span>
+                <div>
+                  <h3 className="text-luxury font-black text-lg tracking-wide uppercase">
+                    Interview Rules & Integrity
+                  </h3>
+                  <p className="text-luxury/80 text-sm font-bold mt-1">
+                    Please review carefully before starting
+                  </p>
+                </div>
+              </div>
+
+              <ul className="space-y-3 mt-4">
+                <li className="flex items-start gap-3">
+                  <div className="shrink-0 w-5 h-5 mt-0.5 rounded-full bg-red-500/20 text-red-600 flex items-center justify-center text-[10px] font-black">
+                    1
+                  </div>
+                  <p className="text-luxury/80 text-sm font-bold leading-relaxed">
+                    <span className="text-red-600 font-black">Focus Required:</span> Switching away from the interview tab more than 2 times will automatically terminate your session.
+                  </p>
+                </li>
+                
+                <li className="flex items-start gap-3">
+                  <div className="shrink-0 w-5 h-5 mt-0.5 rounded-full bg-red-500/20 text-red-600 flex items-center justify-center text-[10px] font-black">
+                    2
+                  </div>
+                  <p className="text-luxury/80 text-sm font-bold leading-relaxed">
+                    <span className="text-red-600 font-black">No Pasting Answers:</span> Copying and pasting large blocks of text (30+ words) is monitored and will be flagged.
+                  </p>
+                </li>
+
+                <li className="flex items-start gap-3">
+                  <div className="shrink-0 w-5 h-5 mt-0.5 rounded-full bg-red-500/20 text-red-600 flex items-center justify-center text-[10px] font-black">
+                    3
+                  </div>
+                  <p className="text-luxury/80 text-sm font-bold leading-relaxed">
+                    <span className="text-red-600 font-black">Integrity Score:</span> All violations are recorded and will heavily penalize your final Session Integrity score on your report.
+                  </p>
+                </li>
+              </ul>
             </div>
           </div>
 
