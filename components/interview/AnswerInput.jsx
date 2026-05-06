@@ -5,12 +5,24 @@ import { useSpeechToText } from '@/hooks/useSpeech';
 export default function AnswerInput({
   answer, setAnswer, onSubmit, onHint,
   loading, hintLoading, error,
+  onPasteDetected, pasteWarning
 }) {
   const wordCount = answer.trim() ? answer.trim().split(/\s+/).length : 0;
 
   const handleTranscript = useCallback((transcript) => {
     setAnswer(transcript);
   }, [setAnswer]);
+
+  const handlePaste = (e) => {
+    // Get pasted text length
+    const pastedText = e.clipboardData?.getData('text') || '';
+    const pastedWordCount = pastedText.trim().split(/\s+/).length;
+    // If pasting 30+ words at once, flag it
+    if (pastedWordCount >= 30) {
+      onPasteDetected?.();
+    }
+    // Do NOT prevent default — allow the paste
+  };
 
   const { listening, supported: sttSupported, toggleListening, stopListening } =
     useSpeechToText({ onTranscript: handleTranscript });
@@ -47,6 +59,7 @@ export default function AnswerInput({
         <textarea
           value={answer}
           onChange={(e) => setAnswer(e.target.value)}
+          onPaste={handlePaste}
           placeholder={sttSupported ? 'Type your thoughts or use the mic to speak naturally...' : 'Type your detailed answer here...'}
           rows={6}
           className={`w-full bg-soft rounded-3xl px-8 py-6 text-luxury placeholder-muted/40 resize-none font-medium leading-relaxed transition-all shadow-inner-soft border-2 outline-none ${
@@ -55,6 +68,12 @@ export default function AnswerInput({
         />
         {listening && <div className="absolute inset-0 rounded-3xl pointer-events-none animate-pulse ring-4 ring-red-500/10" />}
       </div>
+
+      {pasteWarning && (
+        <p className="text-razor-peach text-xs mt-2 flex items-center gap-1">
+          📋 Large paste detected — original answers score higher
+        </p>
+      )}
 
       {/* Error message */}
       {error && (

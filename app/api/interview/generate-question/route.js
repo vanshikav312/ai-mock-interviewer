@@ -12,7 +12,7 @@ const FALLBACK_QUESTIONS = [
 
 export async function POST(request) {
   try {
-    const { role, difficulty, previousQuestions, bulk, count } = await request.json();
+    const { role, difficulty, previousQuestions, bulk, count, jobDescription } = await request.json();
 
     if (!role || !difficulty) {
       return NextResponse.json(
@@ -25,7 +25,7 @@ export async function POST(request) {
     if (bulk === true) {
       const total = count || 5;
       try {
-        const questions = await generateAllQuestions(role, difficulty, total);
+        const questions = await generateAllQuestions(role, difficulty, total, jobDescription || '');
         return NextResponse.json({ questions });
       } catch (bulkErr) {
         console.warn('Bulk generation failed, trying routeAI fallback…', bulkErr.message);

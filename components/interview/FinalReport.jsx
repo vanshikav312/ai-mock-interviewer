@@ -51,6 +51,52 @@ export default function FinalReport({ report, role, difficulty, onSave, saving, 
         </div>
       </div>
 
+      {report.integrityScore !== undefined && (
+        <div className={`glass-panel rounded-2xl p-5 border ${
+          report.integrityScore === 100
+            ? 'border-razor-green/40'
+            : report.integrityScore >= 75
+            ? 'border-razor-peach/40'
+            : 'border-red-500/40'
+        }`}>
+          
+          <div className="flex items-center justify-between mb-3">
+            <h3 className={`font-bold ${report.integrityScore === 100 ? 'text-white' : 'text-red-500'}`}>Session Integrity</h3>
+            <div className="flex items-center gap-2">
+              <span className="text-lg font-black text-white">
+                {report.integrityScore}/100
+              </span>
+              <span className={`text-xs font-bold px-3 py-1 rounded-full ${
+                report.integrityScore === 100
+                  ? 'bg-razor-green/20 text-razor-green'
+                  : report.integrityScore >= 75
+                  ? 'bg-razor-peach/20 text-razor-peach'
+                  : 'bg-red-500/20 text-red-400'
+              }`}>
+                {report.integrityLabel}
+              </span>
+            </div>
+          </div>
+
+          {report.integrityDetails?.length > 0 ? (
+            <ul className="space-y-1">
+              {report.integrityDetails.map((detail, i) => (
+                <li key={i} 
+                    className="text-red-400 text-sm flex items-center gap-2">
+                  <span className="text-red-500">•</span>
+                  {detail}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-razor-green text-sm">
+              No integrity issues detected. Great focus!
+            </p>
+          )}
+
+        </div>
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div className="soft-card p-8 !bg-[#0F3D2E] text-white">
           <h3 className="text-white/40 text-[10px] font-black mb-6 tracking-widest uppercase">✓ Peak Performance Areas</h3>

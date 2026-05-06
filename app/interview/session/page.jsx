@@ -17,6 +17,7 @@ function SessionContent() {
   const role = params.get('role') || 'Software Engineer';
   const difficulty = params.get('difficulty') || 'Medium';
   const totalQuestions = parseInt(params.get('count') || '5', 10);
+  const jd = params.get('jd') ? decodeURIComponent(params.get('jd')) : '';
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [questions, setQuestions] = useState([]);
@@ -30,11 +31,35 @@ function SessionContent() {
   const [error, setError] = useState('');
   const [phase, setPhase] = useState('answering');
 
+  const [tabSwitchCount, setTabSwitchCount] = useState(0);
+  const [showTabWarning, setShowTabWarning] = useState(false);
+  const [sessionFlagged, setSessionFlagged] = useState(false);
+  const [pasteDetected, setPasteDetected] = useState(false);
+  const [pasteWarning, setPasteWarning] = useState(false);
+
   const { speaking, muted, supported: ttsSupported, speak, stop, toggleMute } = useTextToSpeech();
 
   useEffect(() => {
     if (status === 'unauthenticated') router.push('/login');
   }, [status, router]);
+
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.hidden && phase === 'answering') {
+        setTabSwitchCount((prev) => {
+          const newCount = prev + 1;
+          setShowTabWarning(true);
+          setTimeout(() => setShowTabWarning(false), 4000);
+          if (newCount >= 3) setSessionFlagged(true);
+          return newCount;
+        });
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [phase]);
 
   useEffect(() => {
     if (status === 'loading') return;
@@ -45,7 +70,7 @@ function SessionContent() {
         const res = await fetch('/api/interview/generate-question', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ role, difficulty, bulk: true, count: totalQuestions }),
+          body: JSON.stringify({ role, difficulty, bulk: true, count: totalQuestions, jobDescription: jd }),
         });
         if (!res.ok) throw new Error('Bulk fetch failed');
         const data = await res.json();
@@ -126,7 +151,7 @@ function SessionContent() {
       const data = await res.json();
       setEvaluation(data);
       setPhase('scored');
-      const qa = { question: currentQuestion, answer, ...data };
+      const qa = { question: currentQuestion, answer, ...data, pasteDetected };
       const updated = [...allQAsRef.current, qa];
       allQAsRef.current = updated;
     } catch (err) {
@@ -146,6 +171,9 @@ function SessionContent() {
     if (nextIndex >= totalQuestions) {
       const dataToSave = allQAsRef.current;
       sessionStorage.setItem('interviewQAs', JSON.stringify(dataToSave));
+      sessionStorage.setItem('tabSwitches', tabSwitchCount.toString());
+      sessionStorage.setItem('sessionFlagged', sessionFlagged.toString());
+      sessionStorage.setItem('pasteDetected', pasteDetected.toString());
       router.push(`/interview/report?role=${encodeURIComponent(role)}&difficulty=${encodeURIComponent(difficulty)}`);
       return;
     }
@@ -157,6 +185,7 @@ function SessionContent() {
       setEvaluation(null);
       setError('');
       setPhase('answering');
+      setPasteWarning(false);
       stop();
       return;
     }
@@ -189,6 +218,7 @@ function SessionContent() {
         setEvaluation(null);
         setError('');
         setPhase('answering');
+        setPasteWarning(false);
         stop();
         setLoadingQuestions(false);
       });
@@ -232,6 +262,28 @@ function SessionContent() {
         </div>
       </nav>
 
+      {showTabWarning && (
+        <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 
+                        animate-fade-in">
+          <div className="bg-razor-peach/20 border border-razor-peach/60 
+                          text-razor-peach px-6 py-3 rounded-xl 
+                          backdrop-blur shadow-lg text-sm font-bold 
+                          flex items-center gap-2">
+            ⚠️ Tab switch detected ({tabSwitchCount}/3)
+            {tabSwitchCount < 3 
+              ? ' — Stay focused!' 
+              : ' — Session flagged'}
+          </div>
+        </div>
+      )}
+
+      {sessionFlagged && (
+        <div className="bg-red-500/10 border-b border-red-500/30 
+                        text-red-400 text-center text-sm py-2 font-bold">
+          🚨 This session has been flagged for integrity violations
+        </div>
+      )}
+
       <main className="max-w-4xl mx-auto px-6 pt-32 pb-20">
         <div className="animate-slide-up">
           <QuestionCard
@@ -257,6 +309,11 @@ function SessionContent() {
               loading={loadingEval}
               hintLoading={loadingHint}
               error={error}
+              onPasteDetected={() => {
+                setPasteDetected(true);
+                setPasteWarning(true);
+              }}
+              pasteWarning={pasteWarning}
             />
           </div>
         )}

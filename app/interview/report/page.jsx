@@ -86,10 +86,19 @@ function ReportContent() {
       improvements: improvements || '',
     }));
 
+    const tabSwitches = sessionStorage.getItem('tabSwitches') || '0';
+    const pasteDetected = sessionStorage.getItem('pasteDetected') || 'false';
+    const sessionFlagged = sessionStorage.getItem('sessionFlagged') || 'false';
+
     fetch('/api/interview/final-report', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ role, allQAs }),
+      body: JSON.stringify({ 
+        role, 
+        allQAs,
+        tabSwitches,
+        pasteDetected: pasteDetected === 'true'
+      }),
     })
       .then((r) => r.json())
       .then(async (data) => {

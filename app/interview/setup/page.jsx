@@ -13,6 +13,7 @@ export default function SetupPage() {
     difficulty: 'Medium',
     questionCount: 5,
   });
+  const [jobDescription, setJobDescription] = useState('');
   const [starting, setStarting] = useState(false);
 
   useEffect(() => {
@@ -26,6 +27,9 @@ export default function SetupPage() {
       difficulty: config.difficulty,
       count: config.questionCount,
     });
+    if (jobDescription.trim()) {
+      params.set('jd', encodeURIComponent(jobDescription.trim()));
+    }
     router.push(`/interview/session?${params.toString()}`);
   };
 
@@ -55,6 +59,52 @@ export default function SetupPage() {
           <div className="lg:col-span-8 animate-slide-up" style={{ animationDelay: '100ms' }}>
             <div className="soft-card p-10 !bg-[#0F3D2E] text-white">
               <RoleSelector config={config} setConfig={setConfig} />
+            </div>
+
+            <div className="glass-panel rounded-2xl p-6 mt-6">
+              <div className="flex items-center gap-3 mb-4">
+                <span className="text-2xl">📄</span>
+                <div>
+                  <h3 className="text-white font-bold text-base">
+                    Job Description
+                  </h3>
+                  <p className="text-white/60 text-sm">
+                    Optional — questions will be tailored to this role
+                  </p>
+                </div>
+              </div>
+
+              <textarea
+                value={jobDescription}
+                onChange={(e) => {
+                  if (e.target.value.length <= 2000)
+                    setJobDescription(e.target.value)
+                }}
+                placeholder="Paste the job description here...
+e.g. We are looking for a backend engineer with experience 
+in distributed systems, Redis, and payment processing..."
+                rows={5}
+                className="w-full bg-razor-navy/60 border border-razor-teal 
+                           text-white rounded-xl px-4 py-3 text-sm 
+                           placeholder-white/40 resize-none focus:outline-none 
+                           focus:ring-2 focus:ring-razor-accent/50 
+                           focus:border-razor-accent transition-all"
+              />
+
+              <div className="flex items-center justify-between mt-2">
+                <span className="text-xs text-white/60">
+                  {jobDescription.length > 0
+                    ? '✅ Questions will be tailored to this JD'
+                    : 'Leave empty for general interview questions'}
+                </span>
+                <span className={`text-xs font-mono ${
+                  jobDescription.length > 1800
+                    ? 'text-razor-peach'
+                    : 'text-white/60'
+                }`}>
+                  {jobDescription.length}/2000
+                </span>
+              </div>
             </div>
           </div>
 

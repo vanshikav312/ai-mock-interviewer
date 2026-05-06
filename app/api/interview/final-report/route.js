@@ -3,7 +3,7 @@ import { generateReportNarrative } from '@/lib/gemini';
 
 export async function POST(request) {
   try {
-    const { role, allQAs } = await request.json();
+    const { role, allQAs, tabSwitches, pasteDetected } = await request.json();
 
     if (!role || !allQAs || !Array.isArray(allQAs) || allQAs.length === 0) {
       return NextResponse.json(
@@ -55,6 +55,31 @@ export async function POST(request) {
       console.warn('Narrative generation failed, using local fallback:', narrativeErr.message);
     }
 
+    // ── Compute integrity score ─────────────────────────────────────────────
+    const tabSwitchCount = parseInt(tabSwitches || '0', 10);
+    const hadPaste = pasteDetected === true || pasteDetected === 'true';
+    
+    let integrityScore = 100;
+    integrityScore -= tabSwitchCount * 15;
+    if (hadPaste) integrityScore -= 20;
+    integrityScore = Math.max(0, integrityScore);
+
+    let integrityLabel = '';
+    if (integrityScore === 100) integrityLabel = '✅ Clean';
+    else if (integrityScore >= 75) integrityLabel = '⚠️ Minor Flags';
+    else if (integrityScore >= 50) integrityLabel = '⚠️ Flagged';
+    else integrityLabel = '🚨 Integrity Warning';
+
+    const integrityDetails = [];
+    if (tabSwitchCount > 0) {
+      integrityDetails.push(
+        `${tabSwitchCount} tab switch${tabSwitchCount > 1 ? 'es' : ''} detected`
+      );
+    }
+    if (hadPaste) {
+      integrityDetails.push('Large paste detected in one or more answers');
+    }
+
     // ── Merge and return ─────────────────────────────────────────────────────
     return NextResponse.json({
       overallScore,
@@ -65,6 +90,9 @@ export async function POST(request) {
       summary: narrative.summary,
       nextSteps: narrative.nextSteps,
       studyTopics: narrative.studyTopics,
+      integrityScore,
+      integrityLabel,
+      integrityDetails,
     });
 
   } catch (error) {
