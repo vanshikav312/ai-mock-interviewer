@@ -61,15 +61,14 @@ export default function SetupPage() {
               <RoleSelector config={config} setConfig={setConfig} />
             </div>
 
-            <div className="glass-panel rounded-2xl p-6 mt-6">
+            <div className="rounded-2xl p-6 mt-6 border-2 border-accent bg-accent/20 shadow-elevated">
               <div className="flex items-center gap-3 mb-4">
-                <span className="text-2xl">📄</span>
                 <div>
-                  <h3 className="text-white font-bold text-base">
+                  <h3 className="text-luxury font-black text-lg tracking-wide uppercase">
                     Job Description
                   </h3>
-                  <p className="text-white/60 text-sm">
-                    Optional — questions will be tailored to this role
+                  <p className="text-luxury/80 text-sm font-bold mt-1">
+                    Paste your JD here and customize your interview!
                   </p>
                 </div>
               </div>
@@ -84,23 +83,23 @@ export default function SetupPage() {
 e.g. We are looking for a backend engineer with experience 
 in distributed systems, Redis, and payment processing..."
                 rows={5}
-                className="w-full bg-razor-navy/60 border border-razor-teal 
-                           text-white rounded-xl px-4 py-3 text-sm 
-                           placeholder-white/40 resize-none focus:outline-none 
-                           focus:ring-2 focus:ring-razor-accent/50 
-                           focus:border-razor-accent transition-all"
+                className="w-full bg-white border-2 border-accent/50 
+                           text-luxury rounded-xl px-4 py-3 text-sm 
+                           placeholder-muted/60 resize-none focus:outline-none 
+                           focus:ring-2 focus:ring-accent 
+                           focus:border-accent transition-all shadow-inner-soft"
               />
 
               <div className="flex items-center justify-between mt-2">
-                <span className="text-xs text-white/60">
+                <span className="text-xs text-luxury/70 font-bold">
                   {jobDescription.length > 0
                     ? '✅ Questions will be tailored to this JD'
                     : 'Leave empty for general interview questions'}
                 </span>
-                <span className={`text-xs font-mono ${
+                <span className={`text-xs font-black ${
                   jobDescription.length > 1800
-                    ? 'text-razor-peach'
-                    : 'text-white/60'
+                    ? 'text-red-600'
+                    : 'text-luxury/70'
                 }`}>
                   {jobDescription.length}/2000
                 </span>

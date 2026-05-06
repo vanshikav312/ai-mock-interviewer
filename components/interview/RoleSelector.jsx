@@ -11,7 +11,7 @@ export default function RoleSelector({ config, setConfig }) {
         <h3 className="text-[10px] font-black text-white/40 mb-4 tracking-widest uppercase">Select Career Path</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {ROLES.map((role) => (
-            <button key={role} onClick={() => setConfig({ ...config, role })}
+            <button key={role} onClick={() => setConfig({ ...config, role: config.role === role ? '' : role })}
               className={`p-4 rounded-xl border-2 text-left transition-all duration-300 shadow-sm ${
                 config.role === role
                   ? 'border-accent bg-accent/20 text-white shadow-accent/20'
@@ -34,7 +34,7 @@ export default function RoleSelector({ config, setConfig }) {
             };
             
             return (
-              <button key={diff} onClick={() => setConfig({ ...config, difficulty: diff })}
+              <button key={diff} onClick={() => setConfig({ ...config, difficulty: config.difficulty === diff ? '' : diff })}
                 className={`flex-1 py-3.5 rounded-xl border-2 font-bold text-sm transition-all duration-300 shadow-sm ${
                   config.difficulty === diff
                     ? getActiveStyles(diff)
@@ -51,7 +51,7 @@ export default function RoleSelector({ config, setConfig }) {
         <h3 className="text-[10px] font-black text-white/40 mb-4 tracking-widest uppercase">Number of Questions</h3>
         <div className="flex gap-4">
           {QUESTION_COUNTS.map((count) => (
-            <button key={count} onClick={() => setConfig({ ...config, questionCount: count })}
+            <button key={count} onClick={() => setConfig({ ...config, questionCount: config.questionCount === count ? null : count })}
               className={`flex-1 py-3.5 rounded-xl border-2 font-bold transition-all duration-300 shadow-sm text-lg ${
                 config.questionCount === count
                   ? 'border-accent bg-accent/20 text-white shadow-accent/20'
