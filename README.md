@@ -1,6 +1,6 @@
 # AI Mock Interviewer
 
- A production-grade AI mock interview platform with voice, streaming, multi-provider AI routing, NLP scoring, and persistent analytics.
+A production-grade AI mock interview platform with voice, streaming, multi-provider AI routing, NLP scoring, session integrity tracking, and persistent analytics.
 
 **Live Demo → [ai-mock-interviewer-umber.vercel.app](https://ai-mock-interviewer-umber.vercel.app)**  
 **GitHub → [github.com/vanshikav312/ai-mock-interviewer](https://github.com/vanshikav312/ai-mock-interviewer)**
@@ -11,11 +11,20 @@
 
 ## Why This Exists
 
-Most interview prep tools are static flashcard apps. This is a full AI agent loop — it speaks questions aloud, listens to your answers, streams live coaching hints, evaluates your response across 4 dimensions using both LLM and local NLP, and gives you a hiring verdict with a 2-week improvement plan. Built end-to-end as a portfolio project demonstrating real-world AI engineering.
+Most interview prep tools are static flashcard apps. This is a full AI agent loop — it reads questions aloud, listens to your answers, streams live coaching hints, dynamically targets specific Job Descriptions, tracks session integrity to prevent cheating, evaluates your response across multiple dimensions using LLMs and local NLP, and gives you a hiring verdict with a 2-week improvement plan. Built end-to-end as a portfolio project demonstrating real-world AI engineering.
 
 ---
 
 ## Features
+
+### Context-Aware Questioning
+- **Job Description Targeting** — Users can paste a specific Job Description (JD) up to 2,000 characters before starting.
+- **Dynamic Probing** — Gemini AI tailors its generation to strictly probe the candidate on the exact tools, requirements, and responsibilities mentioned in the JD.
+
+### Session Integrity & Anti-Cheat
+- **Tab Switch Detection** — Monitors the browser Visibility API to silently track lost focus. Warns the user, then automatically terminates the session after 3 violations.
+- **Paste Tracking** — Intercepts clipboard events in the Answer Input to flag massive text dumps (30+ words).
+- **Integrity Score** — The final report calculates a strict integrity score based on infractions, permanently logging flags on the final hiring verdict.
 
 ### Voice AI (Web Speech API — zero cost, zero API key)
 - **Text-to-Speech** — AI interviewer reads every question aloud on load
@@ -29,7 +38,7 @@ Most interview prep tools are static flashcard apps. This is a full AI agent loo
 - **Last resort**: Hardcoded safe response — app works even if both providers fail
 - This is how production AI systems handle reliability at scale
 
-###  Optimized API Quota (7 calls vs 15 before)
+### Optimized API Quota (7 calls vs 15 before)
 - **1 call upfront** — all questions generated at once, stored in browser state
 - **1 call per answer** — real-time scorecard after each submission
 - **1 final call** — only narrative text from AI; grade/verdict/strengths computed locally
@@ -48,13 +57,13 @@ Every answer scored 0–100 across:
 
 Plus local NLP: filler word detection (um, uh, like, basically...) and TF-IDF keyword scoring via `natural` npm package
 
-###  Final Report
+### Final Report
 - Grade (A/B/C/D) and hiring verdict — computed locally from scores (no extra API call)
 - **Strong Hire / Hire / Maybe / No Hire**
 - AI-written summary paragraph + personalized 2-week study plan
 - Top 3 strengths from your best answers, critical gaps from your weakest
 
-###  Persistent Analytics Dashboard
+### Persistent Analytics Dashboard
 - Total interviews, average score, personal best — across all sessions
 - Performance trend line chart (Recharts)
 - Last 5 sessions with role, score, date, verdict
@@ -62,7 +71,7 @@ Plus local NLP: filler word detection (um, uh, like, basically...) and TF-IDF ke
 
 ---
 
-##  Architecture
+## Architecture
 
 ```text
 User (Chrome / Edge)
@@ -98,7 +107,7 @@ Google OAuth + credentials
 
 ---
 
-##  Tech Stack
+## Tech Stack
 
 | Layer | Technology | Purpose |
 |---|---|---|
@@ -106,6 +115,7 @@ Google OAuth + credentials
 | Primary AI | Google Gemini 2.5 Flash Lite | Questions, evaluation, hints, reports |
 | Fallback AI | Groq — Llama 3.3 70B | Auto-fallback, 1000 RPD free |
 | Voice | Web Speech API | STT mic input + TTS question reader |
+| Anti-Cheat | DOM & Clipboard APIs | Tracks tab switches and limits copy-pasting |
 | NLP | natural + compromise | TF-IDF scoring, filler word detection |
 | Auth | NextAuth.js | Google OAuth + email/password |
 | Database | MongoDB Atlas + Mongoose | Persistent sessions and user data |
@@ -115,7 +125,7 @@ Google OAuth + credentials
 
 ---
 
-##  Quick Start
+## Quick Start
 
 ### Prerequisites
 - Node.js v18+
@@ -185,7 +195,7 @@ npx vercel
 
 ---
 
-##  Project Structure
+## Project Structure
 
 ```text
 ai-mock-interviewer/
@@ -194,8 +204,8 @@ ai-mock-interviewer/
 │   ├── (auth)/register/page.jsx
 │   ├── dashboard/page.jsx
 │   ├── interview/
-│   │   ├── setup/page.jsx
-│   │   ├── session/page.jsx        ← bulk questions, TTS, useRef state
+│   │   ├── setup/page.jsx          ← JD targeting + Rules Box
+│   │   ├── session/page.jsx        ← bulk questions, TTS, anti-cheat limits, useRef state
 │   │   └── report/page.jsx         ← sessionStorage handoff, auto-save
 │   └── api/
 │       ├── auth/[...nextauth]/route.js
@@ -211,10 +221,10 @@ ai-mock-interviewer/
 │   ├── interview/
 │   │   ├── RoleSelector.jsx
 │   │   ├── QuestionCard.jsx        ← TTS replay + mute toggle
-│   │   ├── AnswerInput.jsx         ← STT mic button
+│   │   ├── AnswerInput.jsx         ← STT mic button + Paste Detection
 │   │   ├── HintBox.jsx
 │   │   ├── ScoreCard.jsx
-│   │   └── FinalReport.jsx
+│   │   └── FinalReport.jsx         ← Displays Integrity Score
 │   └── dashboard/
 │       ├── StatsGrid.jsx
 │       └── PerformanceChart.jsx
@@ -245,7 +255,7 @@ ai-mock-interviewer/
 
 ---
 
-##  API Reference
+## API Reference
 
 | Method | Endpoint | Description |
 |---|---|---|
@@ -258,7 +268,7 @@ ai-mock-interviewer/
 
 ---
 
-## ⚙️ Key Engineering Decisions
+##  Key Engineering Decisions
 
 **`sessionStorage` for report handoff** — passing all Q&A data as URL params caused HTTP 431 (headers too large). Switched to sessionStorage which handles any payload size.
 
@@ -280,7 +290,7 @@ ai-mock-interviewer/
 
 ---
 
-##  What I Would Build Next
+## What I Would Build Next
 
 - Resume upload → auto-generate questions tailored to your CV
 - Company-specific question banks (Razorpay, Google, Flipkart)
@@ -290,13 +300,13 @@ ai-mock-interviewer/
 
 ---
 
-##  Author
+## Author
 
 **Vanshika**
 - GitHub: [@vanshikav312](https://github.com/vanshikav312)
 - LinkedIn: [Vanshika](https://www.linkedin.com/in/vanshikav731/)
 ---
 
-##  License
+## License
 
 MIT — free to use, fork, and build upon.

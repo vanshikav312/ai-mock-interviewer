@@ -22,12 +22,12 @@ export default function HomePage() {
       </nav>
 
       {/* Hero Section - Storytelling Layout */}
-      <section className="relative pt-40 pb-20 px-6 max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-16">
-        <div className="flex-1 space-y-10 animate-slide-up">
+      <section className="relative pt-40 pb-20 px-6 max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 items-center gap-16">
+        <div className="space-y-10 animate-slide-up w-full min-w-0">
           <div className="inline-flex items-center gap-2 bg-luxury/5 border border-luxury/10 text-luxury text-xs font-black px-4 py-1.5 rounded-pill tracking-widest uppercase">
             Next-Gen Interview Prep
           </div>
-          <h1 className="text-6xl md:text-8xl font-black text-luxury leading-[0.9] tracking-tighter">
+          <h1 className="text-5xl md:text-7xl lg:text-8xl font-black text-luxury leading-[0.9] tracking-tighter break-words">
             Practice.<br />
             Polish.<br />
             <span className="text-accent italic">Perfect.</span>
@@ -43,8 +43,8 @@ export default function HomePage() {
         </div>
 
         {/* Asymmetric Mixed Layout Blocks */}
-        <div className="flex-1 relative w-full h-[600px] animate-fade-in">
-          <div className="absolute top-10 right-0 w-72 h-96 soft-card p-6 rotate-3 z-20 animate-float">
+        <div className="relative w-full h-[450px] lg:h-[600px] animate-fade-in mt-12 lg:mt-0">
+          <div className="absolute top-0 lg:top-10 right-0 lg:right-4 w-64 lg:w-72 soft-card p-6 rotate-3 z-20 animate-float">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-12 h-12 rounded-2xl bg-soft flex items-center justify-center text-2xl shadow-inner-soft opacity-20">•</div>
               <div>
@@ -60,7 +60,7 @@ export default function HomePage() {
             <p className="mt-8 text-xs text-muted leading-relaxed italic">"Try explaining the time complexity before writing the code..."</p>
           </div>
 
-          <div className="absolute bottom-10 left-0 w-80 h-72 soft-card-elevated p-8 -rotate-2 z-10">
+          <div className="absolute bottom-0 lg:bottom-10 left-0 lg:left-4 w-72 lg:w-80 soft-card-elevated p-8 -rotate-2 z-10">
             <div className="flex justify-between items-end mb-8">
               <div>
                 <p className="text-4xl font-black text-luxury">82%</p>
