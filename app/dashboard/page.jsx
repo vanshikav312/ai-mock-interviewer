@@ -131,7 +131,7 @@ export default function DashboardPage() {
         {/* History Section - Floating Cards */}
         <div className="space-y-8 animate-slide-up" style={{ animationDelay: '500ms' }}>
           <div className="flex items-center justify-between">
-            <h2 className="text-3xl font-black text-luxury tracking-tighter">Recent activity</h2>
+            <h2 className="text-3xl font-black text-luxury tracking-tighter">Recent activity <span className="text-base font-bold text-muted">({recentSessions.length} of {sessions.length})</span></h2>
             <Link href="/history" className="text-xs font-black uppercase tracking-widest text-muted hover:text-luxury transition-colors">View All →</Link>
           </div>
 
