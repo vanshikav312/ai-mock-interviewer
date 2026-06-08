@@ -71,7 +71,7 @@ export default function HistoryPage() {
           <h1 className="text-5xl md:text-6xl font-black text-luxury tracking-tighter leading-tight mb-4">
             Interview History
           </h1>
-          <p className="text-muted text-lg font-medium">Review your past performances and track your growth over time.</p>
+          <p className="text-muted text-lg font-medium">Every session is a data point. Review your answers, scores, and verdicts to sharpen your edge.</p>
         </div>
 
         <div className="animate-slide-up" style={{ animationDelay: '200ms' }}>
