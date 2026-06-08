@@ -142,7 +142,7 @@ export default function HomePage() {
       </section>
 
       <footer className="py-12 border-t border-depth/30 text-center">
-        <p className="text-muted text-sm font-bold tracking-widest uppercase opacity-50">© 2026 AI Mock Interviewer — Made for humans.</p>
+        <p className="text-muted text-sm font-bold tracking-widest uppercase opacity-50">© 2026 AI Mock Interviewer — Built for developers, designed for humans.</p>
       </footer>
     </main>
   );
