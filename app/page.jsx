@@ -13,6 +13,8 @@ export default function HomePage() {
           <div className="flex items-center gap-8">
             <div className="hidden md:flex items-center gap-8">
               <Link href="#features" className="text-sm font-bold text-muted hover:text-luxury transition-colors">Features</Link>
+              <Link href="#cta" className="text-sm font-bold text-muted hover:text-luxury transition-colors">Get Started</Link>
+              <Link href="#cta" className="text-sm font-bold text-muted hover:text-luxury transition-colors">Get Started</Link>
             </div>
             <Link href="/register" className="pill-btn bg-luxury text-white px-8 py-2.5 text-sm shadow-soft hover:shadow-elevated hover:-translate-y-0.5">
               Sign Up
@@ -33,7 +35,7 @@ export default function HomePage() {
             <span className="text-accent italic">Perfect.</span>
           </h1>
           <p className="text-muted text-xl max-w-xl leading-relaxed font-medium">
-            A human-centered AI interviewer designed to help you master technical conversations through tactile feedback and real-time streaming hints.
+            A production-grade AI interview simulator with voice, real-time hints, multi-provider AI routing, and persistent analytics.
           </p>
           <div className="flex flex-wrap gap-4">
             <Link href="/register" className="pill-btn bg-accent text-white px-12 py-5 text-lg shadow-soft hover:shadow-elevated hover:-translate-y-1">
@@ -89,7 +91,7 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto">
           <div className="mb-20 text-center space-y-4">
             <h2 className="text-5xl font-black text-luxury tracking-tighter">Everything you need to lead.</h2>
-            <p className="text-muted font-medium max-w-xl mx-auto text-lg">Designed for depth, built for growth. Experience the most tactile interview practice platform.</p>
+            <p className="text-muted font-medium max-w-xl mx-auto text-lg">Designed for depth, built for real-world engineering. Every feature solves a real interview prep problem.</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
@@ -132,7 +134,7 @@ export default function HomePage() {
       <section id="cta" className="py-40 px-6 text-center">
         <div className="max-w-3xl mx-auto space-y-12 animate-slide-up">
           <h2 className="text-6xl md:text-8xl font-black text-luxury tracking-tighter">Ready to rise?</h2>
-          <p className="text-muted text-xl font-medium max-w-lg mx-auto">Join thousands of developers leveling up their careers with human-centered AI practice.</p>
+          <p className="text-muted text-xl font-medium max-w-lg mx-auto">Join developers leveling up their interview skills with AI-powered, voice-enabled mock sessions.</p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
             <Link href="/register" className="pill-btn bg-luxury text-white px-12 py-5 text-lg shadow-soft hover:shadow-elevated hover:-translate-y-1">
               Create My Account
