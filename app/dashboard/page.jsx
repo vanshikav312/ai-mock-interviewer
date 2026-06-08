@@ -37,7 +37,7 @@ export default function DashboardPage() {
       <div className="min-h-screen bg-soft flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
           <div className="w-14 h-14 border-4 border-luxury/20 border-t-luxury rounded-full animate-spin shadow-soft" />
-          <div className="text-luxury font-black tracking-widest text-xs uppercase animate-pulse">Refining Dashboard...</div>
+          <div className="text-luxury font-black tracking-widest text-xs uppercase animate-pulse">Loading Dashboard...</div>
         </div>
       </div>
     );
