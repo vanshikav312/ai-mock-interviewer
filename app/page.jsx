@@ -6,7 +6,7 @@ export default function HomePage() {
       {/* Floating Navigation */}
       <nav className="fixed top-8 left-1/2 -translate-x-1/2 z-50 w-[90%] max-w-4xl">
         <div className="glass-panel px-8 py-4 rounded-pill flex items-center justify-between shadow-soft border border-depth/20">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3" role="banner">
             <img src="/logo.png" alt="Logo" className="w-16 h-16 object-contain" />
             <span className="font-black text-luxury tracking-tighter text-xl">AI Mock Interviewer</span>
           </div>
