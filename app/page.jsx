@@ -129,7 +129,7 @@ export default function HomePage() {
       </section>
 
       {/* CTA Footer Section */}
-      <section className="py-40 px-6 text-center">
+      <section id="cta" className="py-40 px-6 text-center">
         <div className="max-w-3xl mx-auto space-y-12 animate-slide-up">
           <h2 className="text-6xl md:text-8xl font-black text-luxury tracking-tighter">Ready to rise?</h2>
           <p className="text-muted text-xl font-medium max-w-lg mx-auto">Join thousands of developers leveling up their careers with human-centered AI practice.</p>
