@@ -133,7 +133,7 @@ export default function HomePage() {
       {/* CTA Footer Section */}
       <section id="cta" className="py-40 px-6 text-center">
         <div className="max-w-3xl mx-auto space-y-12 animate-slide-up">
-          <h2 className="text-6xl md:text-8xl font-black text-luxury tracking-tighter">Ready to rise?</h2>
+          <h2 className="text-6xl md:text-8xl font-black text-luxury tracking-tighter">Ready to ace it?</h2>
           <p className="text-muted text-xl font-medium max-w-lg mx-auto">Join developers leveling up their interview skills with AI-powered, voice-enabled mock sessions.</p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
             <Link href="/register" className="pill-btn bg-luxury text-white px-12 py-5 text-lg shadow-soft hover:shadow-elevated hover:-translate-y-1">
