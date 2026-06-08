@@ -90,7 +90,7 @@ export default function HomePage() {
       <section id="features" className="py-32 px-6 bg-white/50 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto">
           <div className="mb-20 text-center space-y-4">
-            <h2 className="text-5xl font-black text-luxury tracking-tighter">Everything you need to lead.</h2>
+            <h2 className="text-5xl font-black text-luxury tracking-tighter">Everything you need to land the job.</h2>
             <p className="text-muted font-medium max-w-xl mx-auto text-lg">Designed for depth, built for real-world engineering. Every feature solves a real interview prep problem.</p>
           </div>
 
