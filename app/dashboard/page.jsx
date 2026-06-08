@@ -91,9 +91,9 @@ export default function DashboardPage() {
                 <h3 className="text-2xl font-black mb-4">Complete 1 Mock Interview</h3>
                 <div className="flex items-center gap-4">
                   <div className="h-2 flex-1 bg-white/20 rounded-full overflow-hidden">
-                    <div className="h-full bg-white w-[30%]" />
+                    <div className="h-full bg-white w-[0%]" />
                   </div>
-                  <span className="text-xs font-bold text-white/90">30% Done</span>
+                  <span className="text-xs font-bold text-white/90">0% Done</span>
                 </div>
               </div>
               <div className="absolute -right-10 -bottom-10 w-40 h-40 bg-white/10 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-1000" />
