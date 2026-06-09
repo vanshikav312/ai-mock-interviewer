@@ -107,6 +107,45 @@ Google OAuth + credentials
 
 ---
 
+## 🎙️ Real-Time Audio Streaming Pipeline (Deepgram + WebSocket)
+
+To provide an immersive, conversational interview experience, this app features a real-time, low-latency voice pipeline. Candidates speak into their microphone and see their transcripts update word-by-word on screen, mimicking live captioning.
+
+### 1. Streaming Pipeline Architecture
+
+```text
+┌──────────┐ (Mic Audio) ┌──────────────┐ (Audio Chunks) ┌──────────────┐
+│ Candidate│ ──────────> │ Node.js WS   │ ─────────────> │  Deepgram    │
+│ Browser  │             │ Server (3001)│                │  Nova-2 STT  │
+└──────────┘ <────────── └──────────────┘ <───────────── └──────────────┘
+              (Interim &    (Port 3001)    (Authorization    (Cloud STT)
+             Final JSON)                   Server-side Token)
+```
+
+1. **Audio Capture:** The browser captures microphone input using the `MediaRecorder` API and slices it into small binary chunks every `250ms` (using `audio/webm` with opus, falling back to other native container formats).
+2. **WebSocket Gateway:** The binary chunks are streamed live over a secure WebSocket connection to our standalone Node.js server (`ws://localhost:3001`).
+3. **Secure Bridge:** The Node server acts as a proxy, immediately forwarding these raw audio bytes to Deepgram's Live Streaming STT API over a secure server-to-server WebSocket (`wss://api.deepgram.com/v1/listen`).
+4. **Credential Isolation:** The server-side proxy keeps the `DEEPGRAM_API_KEY` hidden from the client browser, completely eliminating exposure risks.
+5. **Real-time Feedback:** Deepgram returns transcript packages. The Node server relays these back to the browser in a normalized JSON structure: `{ type: "interim" | "final", text: "..." }`.
+
+### 2. Engineering Trade-offs & Architecture Choices
+
+#### Why Streaming STT (Deepgram Nova-2) vs. Web Speech API vs. Whisper?
+* **vs. Web Speech API (One-Shot):** The Web Speech API runs client-side and requires the user to stop talking before yielding a transcript, which destroys the flow of a natural conversation. It also has inconsistent browser support (Safari and Firefox do not support its STT well) and varies in accuracy based on the user's OS. Deepgram streams transcripts *while* the candidate is speaking with >95% accuracy and cross-browser consistency.
+* **vs. OpenAI Whisper (REST API):** Whisper is primarily batch-based. Recording a 30-second response, saving it as a file, uploading it over HTTP, and waiting for the API response takes 3–5 seconds of latency. Deepgram Nova-2 is built for stream-based real-time audio with a sub-`300ms` response latency.
+
+#### Why Standalone WebSocket Server vs. Next.js Custom Server vs. Route Handlers?
+* **Route Handlers (Serverless API):** Next.js Route Handlers run in serverless functions (like Vercel). Serverless environments are stateless, do not support persistent TCP/WebSocket connections, and automatically time out after 10–60 seconds.
+* **Custom Next.js Server (`server.js` wrapping `next`):** Bypassing Next.js's CLI by using a custom server disables automatic static optimization and is extremely difficult to deploy on platforms like Vercel.
+* **Standalone Node WebSocket Server (Our Choice):** We run a lightweight Node server (`ws` library) on port `3001`. This keeps the Next.js frontend standard, allows easy containerized deployment of the WebSocket server (e.g. Render, Railway, DigitalOcean), and isolates real-time socket processing from Next.js page generation.
+
+### 3. Handling Interim vs. Final Transcripts
+To avoid UI flicker and browser cursor-jumping while typing or editing:
+* **Interim Transcripts (`{ type: "interim", text: "..." }`):** These represent tentative guesses from Deepgram as the user is speaking. The hook updates an `interimText` state. The UI renders this text inside a separate, pulsing, semi-transparent bubble overlay.
+* **Final Transcripts (`{ type: "final", text: "..." }`):** These occur when the user pauses (detected by Deepgram's `endpointing=300` setting). The server commits these sentences, appending them directly to the textarea `answer` state, and clears the interim buffer.
+
+---
+
 ## Tech Stack
 
 | Layer | Technology | Purpose |
