@@ -1,31 +1,89 @@
 'use client';
-import { useCallback } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import { useSpeechToText } from '@/hooks/useSpeech';
+import { useStreamingSpeech } from '@/hooks/useStreamingSpeech';
 
 export default function AnswerInput({
   answer, setAnswer, onSubmit, onHint,
   loading, hintLoading, error,
   onPasteDetected, pasteWarning
 }) {
+  const [useFallback, setUseFallback] = useState(false);
+  const [fallbackWarning, setFallbackWarning] = useState(false);
+
+  // 1. Streaming STT Hook (WebSocket -> Deepgram)
+  const {
+    listening: streamingListening,
+    status: streamingStatus,
+    error: streamingError,
+    supported: streamingSupported,
+    interimText: streamingInterimText,
+    toggleListening: toggleStreaming,
+    stopListening: stopStreaming
+  } = useStreamingSpeech({
+    onTranscript: useCallback((text, isFinal) => {
+      // Only set final answers to avoid cursor jumping issues
+      if (isFinal) {
+        setAnswer(text);
+      }
+    }, [setAnswer])
+  });
+
+  // 2. Web Speech API STT Hook (Browser Fallback)
+  const {
+    listening: webSpeechListening,
+    supported: webSpeechSupported,
+    toggleListening: toggleWebSpeech,
+    stopListening: stopWebSpeech
+  } = useSpeechToText({
+    onTranscript: useCallback((transcript) => {
+      setAnswer(transcript);
+    }, [setAnswer])
+  });
+
+  // Automatically fall back if streaming STT errors out
+  useEffect(() => {
+    if (streamingError && !useFallback) {
+      console.warn('Streaming STT failed, falling back to browser Speech API:', streamingError);
+      setUseFallback(true);
+      setFallbackWarning(true);
+      
+      // If we were actively recording, stop streaming and run Web Speech
+      if (streamingListening) {
+        stopStreaming();
+        toggleWebSpeech();
+      }
+    }
+  }, [streamingError, streamingListening, useFallback, stopStreaming, toggleWebSpeech]);
+
+  const listening = streamingListening || webSpeechListening;
+  const sttSupported = (streamingSupported && !useFallback) || webSpeechSupported;
+
+  const toggleListening = () => {
+    if (useFallback || !streamingSupported) {
+      toggleWebSpeech();
+    } else {
+      toggleStreaming();
+    }
+  };
+
+  const stopListening = () => {
+    if (useFallback || !streamingSupported) {
+      stopWebSpeech();
+    } else {
+      stopStreaming();
+    }
+  };
+
   const wordCount = answer.trim() ? answer.trim().split(/\s+/).length : 0;
 
-  const handleTranscript = useCallback((transcript) => {
-    setAnswer(transcript);
-  }, [setAnswer]);
-
   const handlePaste = (e) => {
-    // Get pasted text length
     const pastedText = e.clipboardData?.getData('text') || '';
     const pastedWordCount = pastedText.trim().split(/\s+/).length;
-    // If pasting 30+ words at once, flag it
     if (pastedWordCount >= 30) {
       onPasteDetected?.();
     }
-    // Do NOT prevent default — allow the paste
   };
-
-  const { listening, supported: sttSupported, toggleListening, stopListening } =
-    useSpeechToText({ onTranscript: handleTranscript });
 
   const handleSubmit = () => {
     if (listening) stopListening();
@@ -41,9 +99,16 @@ export default function AnswerInput({
         </label>
         <div className="flex items-center gap-3">
           {listening && (
-            <span className="flex items-center gap-2 text-[10px] text-red-600 font-black uppercase tracking-widest bg-red-50 px-4 py-2 rounded-pill shadow-inner-soft">
-              <span className="w-1.5 h-1.5 bg-red-600 rounded-full animate-ping" />
-              Recording
+            <span className={`flex items-center gap-2 text-[10px] font-black uppercase tracking-widest px-4 py-2 rounded-pill shadow-inner-soft ${
+              streamingStatus === 'connecting' ? 'text-yellow-600 bg-yellow-50' :
+              webSpeechListening ? 'text-orange-600 bg-orange-50' : 'text-green-600 bg-green-50'
+            }`}>
+              <span className={`w-1.5 h-1.5 rounded-full ${
+                streamingStatus === 'connecting' ? 'bg-yellow-500 animate-pulse' :
+                webSpeechListening ? 'bg-orange-500 animate-ping' : 'bg-green-600 animate-ping'
+              }`} />
+              {streamingStatus === 'connecting' ? 'Connecting...' :
+               webSpeechListening ? 'Browser Fallback' : 'Live Streaming STT'}
             </span>
           )}
           <span className={`text-[10px] font-black px-4 py-2 rounded-pill shadow-inner-soft uppercase tracking-widest ${
@@ -63,11 +128,34 @@ export default function AnswerInput({
           placeholder={sttSupported ? 'Type your thoughts or use the mic to speak naturally...' : 'Type your detailed answer here...'}
           rows={6}
           className={`w-full bg-soft rounded-3xl px-8 py-6 text-luxury placeholder-muted/40 resize-none font-medium leading-relaxed transition-all shadow-inner-soft border-2 outline-none ${
-            listening ? 'border-red-200 ring-4 ring-red-50' : 'border-transparent focus:border-luxury/10 focus:bg-white focus:shadow-soft'
+            streamingStatus === 'connecting' ? 'border-yellow-200 ring-4 ring-yellow-50' :
+            streamingListening ? 'border-green-200 ring-4 ring-green-50' :
+            webSpeechListening ? 'border-orange-200 ring-4 ring-orange-50' :
+            'border-transparent focus:border-luxury/10 focus:bg-white focus:shadow-soft'
           }`}
         />
-        {listening && <div className="absolute inset-0 rounded-3xl pointer-events-none animate-pulse ring-4 ring-red-500/10" />}
+        {listening && (
+          <div className={`absolute inset-0 rounded-3xl pointer-events-none animate-pulse ring-4 ${
+            streamingStatus === 'connecting' ? 'ring-yellow-500/10' :
+            webSpeechListening ? 'ring-orange-500/10' : 'ring-green-500/10'
+          }`} />
+        )}
+
+        {/* Live Interim Transcript Bubble */}
+        {streamingListening && streamingInterimText && (
+          <div className="absolute bottom-4 left-8 right-8 text-xs font-semibold text-accent bg-white/95 backdrop-blur border border-accent/20 px-4 py-2.5 rounded-2xl shadow-soft pointer-events-none animate-pulse flex items-center gap-2">
+            <span className="w-1.5 h-1.5 bg-accent rounded-full animate-ping" />
+            <span className="text-muted text-[10px] font-black uppercase tracking-wider">Hearing:</span>
+            <span className="text-luxury italic">"{streamingInterimText}"</span>
+          </div>
+        )}
       </div>
+
+      {fallbackWarning && (
+        <p className="text-orange-600 text-[10px] font-bold mt-2 uppercase tracking-widest flex items-center gap-1 bg-orange-50 px-3 py-1.5 rounded-lg border border-orange-100 animate-slide-up">
+          ⚠️ STT server offline. Switched to native browser Web Speech API.
+        </p>
+      )}
 
       {pasteWarning && (
         <p className="text-razor-peach text-xs mt-2 flex items-center gap-1">
@@ -90,7 +178,11 @@ export default function AnswerInput({
             onClick={toggleListening}
             disabled={loading}
             className={`w-16 h-16 rounded-full flex items-center justify-center text-2xl transition-all shadow-soft border-2 ${
-              listening ? 'bg-red-500 border-red-400 text-white animate-pulse scale-110' : 'bg-[#0F3D2E] border-white/10 text-white hover:bg-[#1F7A63]'
+              listening 
+                ? (streamingStatus === 'connecting' ? 'bg-yellow-500 border-yellow-400 text-white animate-pulse' :
+                   webSpeechListening ? 'bg-orange-500 border-orange-400 text-white animate-pulse' :
+                   'bg-green-500 border-green-400 text-white animate-pulse scale-110')
+                : 'bg-[#0F3D2E] border-white/10 text-white hover:bg-[#1F7A63]'
             }`}
           >
             {listening ? '⏹' : '🎙'}
@@ -123,3 +215,4 @@ export default function AnswerInput({
     </div>
   );
 }
+
