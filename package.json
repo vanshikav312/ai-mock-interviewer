@@ -4,6 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:stt": "node server.js",
+    "dev:rag": "D:/ai-interview-service/venv/Scripts/uvicorn main:app --reload --port 8000 --app-dir D:/ai-interview-service",
+    "dev:all": "concurrently --names \"NEXT,STT,RAG\" --prefix-colors \"blue,magenta,green\" \"npm run dev\" \"npm run dev:stt\" \"npm run dev:rag\"",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
@@ -26,6 +29,7 @@
   },
   "devDependencies": {
     "autoprefixer": "^10.4.19",
+    "concurrently": "^10.0.3",
     "eslint": "^8",
     "eslint-config-next": "14.2.5",
     "postcss": "^8.4.39",

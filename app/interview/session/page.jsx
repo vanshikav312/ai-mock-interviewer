@@ -24,6 +24,11 @@ function SessionContent() {
   const [answer, setAnswer] = useState('');
   const [hint, setHint] = useState('');
   const [evaluation, setEvaluation] = useState(null);
+  
+  const [sessionId, setSessionId] = useState(null);
+  const [isFollowUp, setIsFollowUp] = useState(false);
+  const [nextTurnInfo, setNextTurnInfo] = useState(null);
+  const [isFallbackMode, setIsFallbackMode] = useState(false);
   const allQAsRef = useRef([]);
   const [loadingQuestions, setLoadingQuestions] = useState(true);
   const [loadingEval, setLoadingEval] = useState(false);
@@ -70,38 +75,67 @@ function SessionContent() {
   useEffect(() => {
     if (status === 'loading') return;
 
-    async function fetchAllQuestions() {
+    async function startRagSession() {
       setLoadingQuestions(true);
       try {
-        const res = await fetch('/api/interview/generate-question', {
+        const payload = {
+          action: 'start',
+          role,
+          difficulty,
+          num_questions: totalQuestions,
+          jd_text: jd || `General ${role} interview`
+        };
+
+        const res = await fetch('/api/interview/rag-session', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ role, difficulty, bulk: true, count: totalQuestions, jobDescription: jd }),
+          body: JSON.stringify(payload),
         });
-        if (!res.ok) throw new Error('Bulk fetch failed');
+        
+        if (!res.ok) throw new Error('Start session failed');
+        
         const data = await res.json();
-        if (!Array.isArray(data.questions) || data.questions.length === 0) throw new Error('No questions');
-        setQuestions(data.questions);
+        setSessionId(data.session_id);
+        setQuestions([data.question]);
+        setCurrentIndex(0);
+        setIsFollowUp(data.is_follow_up);
+        setIsFallbackMode(false);
+        setLoadingQuestions(false);
       } catch (err) {
-        console.warn('Bulk fetch failed, falling back to single question fetch…', err.message);
+        console.warn('Python RAG API failed, falling back to local flow...', err);
+        setIsFallbackMode(true);
+        // Fallback: fetch original questions
         try {
           const res = await fetch('/api/interview/generate-question', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ role, difficulty }),
+            body: JSON.stringify({ role, difficulty, bulk: true, count: totalQuestions, jobDescription: jd }),
           });
+          if (!res.ok) throw new Error('Bulk fetch failed');
           const data = await res.json();
-          setQuestions([data.question || 'Explain a challenging technical problem you solved.']);
-        } catch {
-          setQuestions(['Explain a challenging technical problem you solved and how you approached it.']);
+          if (!Array.isArray(data.questions) || data.questions.length === 0) throw new Error('No questions');
+          setQuestions(data.questions);
+        } catch (fallbackErr) {
+          console.warn('Bulk fetch fallback failed, falling back to single...', fallbackErr.message);
+          try {
+            const res = await fetch('/api/interview/generate-question', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ role, difficulty }),
+            });
+            const data = await res.json();
+            setQuestions([data.question || 'Explain a challenging technical problem you solved.']);
+          } catch {
+            setQuestions(['Explain a challenging technical problem you solved and how you approached it.']);
+          }
+        } finally {
+          setLoadingQuestions(false);
         }
-      } finally {
-        setLoadingQuestions(false);
       }
     }
 
-    fetchAllQuestions();
-  }, [status, role, difficulty, totalQuestions]);
+    startRagSession();
+  }, [status, role, difficulty, totalQuestions, jd]);
 
   const currentQuestion = questions[currentIndex] || '';
 
@@ -143,23 +177,101 @@ function SessionContent() {
     setLoadingEval(true);
     setError('');
     stop();
+
+    if (isFallbackMode) {
+      try {
+        const res = await fetch('/api/interview/evaluate-answer', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ role, question: currentQuestion, answer }),
+        });
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          if (res.status === 503) throw new Error('overloaded');
+          throw new Error(data.error || 'Failed');
+        }
+        const data = await res.json();
+        setEvaluation(data);
+        setPhase('scored');
+        const qa = { question: currentQuestion, answer, ...data, pasteDetected };
+        allQAsRef.current = [...allQAsRef.current, qa];
+      } catch (err) {
+        if (err.message === 'overloaded') {
+          setError('The AI service is temporarily busy. Your answer is saved — click Submit again in a moment.');
+        } else {
+          setError('Something went wrong evaluating your answer. Please try again.');
+        }
+      } finally {
+        setLoadingEval(false);
+      }
+      return;
+    }
+
     try {
-      const res = await fetch('/api/interview/evaluate-answer', {
+      const res = await fetch('/api/interview/rag-session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ role, question: currentQuestion, answer }),
+        body: JSON.stringify({ action: 'answer', session_id: sessionId, answer }),
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
         if (res.status === 503) throw new Error('overloaded');
         throw new Error(data.error || 'Failed');
       }
+      
       const data = await res.json();
-      setEvaluation(data);
+      const evalData = data.last_evaluation || {};
+      
+      const overallScore = evalData.scores?.overall || 0;
+      let calculatedVerdict = 'Needs Work';
+      if (overallScore >= 85) calculatedVerdict = 'Excellent';
+      else if (overallScore >= 70) calculatedVerdict = 'Good';
+      else if (overallScore >= 50) calculatedVerdict = 'Average';
+
+      const formattedEval = {
+        score: overallScore,
+        clarity: evalData.scores?.clarity || 0,
+        technical: evalData.scores?.technical || 0,
+        relevance: evalData.scores?.relevance || 0,
+        feedback: evalData.feedback || '',
+        strengths: evalData.strengths || [],
+        improvements: evalData.improvements || [],
+        grounded: evalData.grounded,
+        reference_topic: evalData.reference_topic,
+        is_follow_up: evalData.is_follow_up,
+        verdict: evalData.verdict || calculatedVerdict,
+      };
+
+      setEvaluation(formattedEval);
       setPhase('scored');
-      const qa = { question: currentQuestion, answer, ...data, pasteDetected };
-      const updated = [...allQAsRef.current, qa];
-      allQAsRef.current = updated;
+      
+      // Save a flat QA to the ref — final-report route expects strings, not arrays
+      const qa = {
+        question: currentQuestion,
+        answer,
+        score: formattedEval.score,
+        clarity: formattedEval.clarity,
+        technical: formattedEval.technical,
+        relevance: formattedEval.relevance,
+        verdict: formattedEval.verdict,
+        strengths: Array.isArray(formattedEval.strengths)
+          ? formattedEval.strengths.join('. ')
+          : (formattedEval.strengths || ''),
+        improvements: Array.isArray(formattedEval.improvements)
+          ? formattedEval.improvements.join('. ')
+          : (formattedEval.improvements || ''),
+        idealAnswer: '',
+        pasteDetected,
+      };
+      allQAsRef.current = [...allQAsRef.current, qa];
+      
+      setNextTurnInfo({
+        status: data.status,
+        question: data.question,
+        isFollowUp: data.is_follow_up,
+        questionNumber: data.question_number, // 1-based, main questions only (from Python)
+      });
+
     } catch (err) {
       if (err.message === 'overloaded') {
         setError('The AI service is temporarily busy. Your answer is saved — click Submit again in a moment.');
@@ -172,9 +284,66 @@ function SessionContent() {
   };
 
   const handleNext = () => {
-    const nextIndex = currentIndex + 1;
+    if (isFallbackMode) {
+      const nextIndex = currentIndex + 1;
+      if (nextIndex >= totalQuestions) {
+        const dataToSave = allQAsRef.current;
+        sessionStorage.setItem('interviewQAs', JSON.stringify(dataToSave));
+        sessionStorage.setItem('tabSwitches', tabSwitchCount.toString());
+        sessionStorage.setItem('sessionFlagged', sessionFlagged.toString());
+        sessionStorage.setItem('pasteDetected', pasteDetected.toString());
+        router.push(`/interview/report?role=${encodeURIComponent(role)}&difficulty=${encodeURIComponent(difficulty)}`);
+        return;
+      }
 
-    if (nextIndex >= totalQuestions) {
+      if (questions[nextIndex]) {
+        setCurrentIndex(nextIndex);
+        setAnswer('');
+        setHint('');
+        setEvaluation(null);
+        setError('');
+        setPhase('answering');
+        setPasteWarning(false);
+        stop();
+        return;
+      }
+
+      setLoadingQuestions(true);
+      fetch('/api/interview/generate-question', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ role, difficulty }),
+      })
+        .then((r) => r.json())
+        .then((data) => {
+          setQuestions((prev) => {
+            const updated = [...prev];
+            updated[nextIndex] = data.question || 'Explain a challenging technical problem you solved.';
+            return updated;
+          });
+        })
+        .catch(() => {
+          setQuestions((prev) => {
+            const updated = [...prev];
+            updated[nextIndex] = 'Explain a challenging technical problem you solved and how you approached it.';
+            return updated;
+          });
+        })
+        .finally(() => {
+          setCurrentIndex(nextIndex);
+          setAnswer('');
+          setHint('');
+          setEvaluation(null);
+          setError('');
+          setPhase('answering');
+          setPasteWarning(false);
+          stop();
+          setLoadingQuestions(false);
+        });
+      return;
+    }
+
+    if (nextTurnInfo?.status === 'complete') {
       const dataToSave = allQAsRef.current;
       sessionStorage.setItem('interviewQAs', JSON.stringify(dataToSave));
       sessionStorage.setItem('tabSwitches', tabSwitchCount.toString());
@@ -184,50 +353,52 @@ function SessionContent() {
       return;
     }
 
-    if (questions[nextIndex]) {
-      setCurrentIndex(nextIndex);
+    if (nextTurnInfo?.question) {
+      if (nextTurnInfo.isFollowUp) {
+        // Follow-up: replace the current question slot, index stays the same
+        setQuestions((prev) => {
+          const updated = [...prev];
+          updated[currentIndex] = nextTurnInfo.question;
+          return updated;
+        });
+        // currentIndex stays unchanged — follow-ups don't advance progress
+      } else {
+        // Main question: use the backend's authoritative question_number (1-based)
+        // This prevents any drift from follow-up counting
+        const nextIdx = nextTurnInfo.questionNumber != null
+          ? nextTurnInfo.questionNumber - 1  // backend says this is main question N
+          : currentIndex + 1;                 // fallback if questionNumber missing
+
+        // Hard cap: never exceed what the user selected
+        if (nextIdx >= totalQuestions) {
+          // Backend sent an extra question somehow — just complete the session
+          const dataToSave = allQAsRef.current;
+          sessionStorage.setItem('interviewQAs', JSON.stringify(dataToSave));
+          sessionStorage.setItem('tabSwitches', tabSwitchCount.toString());
+          sessionStorage.setItem('sessionFlagged', sessionFlagged.toString());
+          sessionStorage.setItem('pasteDetected', pasteDetected.toString());
+          router.push(`/interview/report?role=${encodeURIComponent(role)}&difficulty=${encodeURIComponent(difficulty)}`);
+          return;
+        }
+
+        setQuestions((prev) => {
+          const updated = [...prev];
+          updated[nextIdx] = nextTurnInfo.question;
+          return updated;
+        });
+        setCurrentIndex(nextIdx);
+      }
+      setIsFollowUp(nextTurnInfo.isFollowUp);
+      
       setAnswer('');
       setHint('');
       setEvaluation(null);
       setError('');
       setPhase('answering');
       setPasteWarning(false);
+      setNextTurnInfo(null);
       stop();
-      return;
     }
-
-    setLoadingQuestions(true);
-    fetch('/api/interview/generate-question', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ role, difficulty }),
-    })
-      .then((r) => r.json())
-      .then((data) => {
-        setQuestions((prev) => {
-          const updated = [...prev];
-          updated[nextIndex] = data.question || 'Explain a challenging technical problem you solved.';
-          return updated;
-        });
-      })
-      .catch(() => {
-        setQuestions((prev) => {
-          const updated = [...prev];
-          updated[nextIndex] = 'Explain a challenging technical problem you solved and how you approached it.';
-          return updated;
-        });
-      })
-      .finally(() => {
-        setCurrentIndex(nextIndex);
-        setAnswer('');
-        setHint('');
-        setEvaluation(null);
-        setError('');
-        setPhase('answering');
-        setPasteWarning(false);
-        stop();
-        setLoadingQuestions(false);
-      });
   };
 
   if (status === 'loading' || loadingQuestions) {
@@ -301,6 +472,7 @@ function SessionContent() {
             muted={muted}
             onToggleMute={toggleMute}
             ttsSupported={ttsSupported}
+            isFollowUp={isFollowUp}
           />
         </div>
 
@@ -329,7 +501,7 @@ function SessionContent() {
             <ScoreCard
               evaluation={evaluation}
               onNext={handleNext}
-              isLast={currentIndex + 1 >= totalQuestions}
+              isLast={isFallbackMode ? (currentIndex + 1 >= totalQuestions) : (nextTurnInfo?.status === 'complete')}
             />
           </div>
         )}

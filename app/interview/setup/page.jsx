@@ -92,8 +92,7 @@ export default function SetupPage() {
               <textarea
                 value={jobDescription}
                 onChange={(e) => {
-                  if (e.target.value.length <= 2000)
-                    setJobDescription(e.target.value)
+                  setJobDescription(e.target.value.slice(0, 2000));
                 }}
                 placeholder="Paste the job description here...
 e.g. We are looking for a backend engineer with experience 

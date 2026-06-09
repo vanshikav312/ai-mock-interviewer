@@ -54,18 +54,41 @@ export default function ScoreCard({ evaluation, onNext, isLast }) {
       )}
 
       <div className="grid grid-cols-1 gap-6">
-        <div className="bg-soft border border-depth/30 rounded-3xl p-6 sm:p-8 hover:bg-white transition-colors group">
+        <div className="bg-soft border border-depth/30 rounded-3xl p-6 sm:p-8 hover:bg-white transition-colors group relative">
+          {evaluation.grounded && (
+            <span className="absolute top-4 right-4 bg-sage/20 text-sage-dark text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-pill">
+              Fact-Grounded
+            </span>
+          )}
           <p className="text-luxury text-[10px] font-black uppercase tracking-widest mb-4 opacity-50 group-hover:opacity-100">✓ Strengths</p>
-          <p className="text-luxury text-sm leading-relaxed font-medium">{strengths}</p>
+          <div className="text-luxury text-sm leading-relaxed font-medium">
+            {Array.isArray(strengths) ? (
+              <ul className="list-disc pl-4 space-y-2">
+                {strengths.map((s, i) => <li key={i}>{s}</li>)}
+              </ul>
+            ) : (
+              <p>{strengths}</p>
+            )}
+          </div>
         </div>
         <div className="bg-accent/5 border border-accent/10 rounded-3xl p-6 sm:p-8 hover:bg-white transition-colors group">
           <p className="text-accent text-[10px] font-black uppercase tracking-widest mb-4 opacity-50 group-hover:opacity-100">↑ Improvements</p>
-          <p className="text-luxury text-sm leading-relaxed font-medium">{improvements}</p>
+          <div className="text-luxury text-sm leading-relaxed font-medium">
+            {Array.isArray(improvements) ? (
+              <ul className="list-disc pl-4 space-y-2">
+                {improvements.map((s, i) => <li key={i}>{s}</li>)}
+              </ul>
+            ) : (
+              <p>{improvements}</p>
+            )}
+          </div>
         </div>
-        <div className="bg-luxury/5 border border-luxury/10 rounded-3xl p-6 sm:p-8 hover:bg-white transition-colors group">
-          <p className="text-luxury text-[10px] font-black uppercase tracking-widest mb-4 opacity-50 group-hover:opacity-100">★ Ideal Perspective</p>
-          <p className="text-luxury text-sm leading-relaxed font-medium">{idealAnswer}</p>
-        </div>
+        {idealAnswer && (
+          <div className="bg-luxury/5 border border-luxury/10 rounded-3xl p-6 sm:p-8 hover:bg-white transition-colors group">
+            <p className="text-luxury text-[10px] font-black uppercase tracking-widest mb-4 opacity-50 group-hover:opacity-100">★ Ideal Perspective</p>
+            <p className="text-luxury text-sm leading-relaxed font-medium">{idealAnswer}</p>
+          </div>
+        )}
       </div>
 
       <button onClick={onNext}

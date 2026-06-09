@@ -82,8 +82,8 @@ function ReportContent() {
       verdict: verdict || '',
       fillerWords: fillerWordCount || 0,
       idealAnswer: idealAnswer || '',
-      strengths: strengths || '',
-      improvements: improvements || '',
+      strengths: Array.isArray(strengths) ? strengths.join('. ') : (strengths || ''),
+      improvements: Array.isArray(improvements) ? improvements.join('. ') : (improvements || ''),
     }));
 
     const tabSwitches = sessionStorage.getItem('tabSwitches') || '0';
@@ -123,7 +123,11 @@ function ReportContent() {
               finalReport: data,
             }),
           });
-          if (res.ok) setSaved(true);
+          if (!res.ok) {
+            const errData = await res.json().catch(() => ({}));
+            throw new Error(errData.error || `Server error: ${res.status}`);
+          }
+          setSaved(true);
         } catch (e) {
           console.error('Auto-save error:', e);
         } finally {
@@ -151,8 +155,8 @@ function ReportContent() {
         verdict: verdict || '',
         fillerWords: fillerWordCount || 0,
         idealAnswer: idealAnswer || '',
-        strengths: strengths || '',
-        improvements: improvements || '',
+        strengths: Array.isArray(strengths) ? strengths.join('. ') : (strengths || ''),
+        improvements: Array.isArray(improvements) ? improvements.join('. ') : (improvements || ''),
       }));
       const res = await fetch('/api/sessions', {
         method: 'POST',
@@ -166,9 +170,13 @@ function ReportContent() {
           finalReport: report,
         }),
       });
-      if (res.ok) setSaved(true);
-    } catch {
-      alert('Failed to save. Please try again.');
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || `Server error: ${res.status}`);
+      }
+      setSaved(true);
+    } catch (err) {
+      alert(`Failed to save: ${err.message}`);
     } finally {
       setSaving(false);
     }

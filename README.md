@@ -1,9 +1,10 @@
 # AI Mock Interviewer
 
-A production-grade AI mock interview platform with voice, streaming, multi-provider AI routing, NLP scoring, session integrity tracking, and persistent analytics.
+A production-grade, dual-service AI mock interview platform featuring a LangGraph agent loop, local RAG retrieval, real-time voice streaming via Deepgram WebSockets, multi-provider AI routing, session integrity tracking, and persistent analytics.
 
 **Live Demo → [ai-mock-interviewer-umber.vercel.app](https://ai-mock-interviewer-umber.vercel.app)**  
-**GitHub → [github.com/vanshikav312/ai-mock-interviewer](https://github.com/vanshikav312/ai-mock-interviewer)**
+**Frontend Repository → [github.com/vanshikav312/ai-mock-interviewer](https://github.com/vanshikav312/ai-mock-interviewer)**  
+**Backend RAG Service → [github.com/vanshikav312/ai-interview-service](https://github.com/vanshikav312/ai-interview-service)**
 
 > Voice features require **Chrome or Edge** browser.
 
@@ -11,231 +12,105 @@ A production-grade AI mock interview platform with voice, streaming, multi-provi
 
 ## Why This Exists
 
-Most interview prep tools are static flashcard apps. This is a full AI agent loop — it reads questions aloud, listens to your answers, streams live coaching hints, dynamically targets specific Job Descriptions, tracks session integrity to prevent cheating, evaluates your response across multiple dimensions using LLMs and local NLP, and gives you a hiring verdict with a 2-week improvement plan. Built end-to-end as a portfolio project demonstrating real-world AI engineering.
+Most interview prep tools are static flashcard apps or simple prompt wrappers. This platform implements a production-ready **dual-server agentic architecture**:
+- **Next.js Frontend (React/Node.js)**: Handles user experience, real-time audio socket bridging, and database persistence (MongoDB).
+- **Python RAG Service (FastAPI/LangGraph/ChromaDB)**: Orchestrates the conversation flow, extracts job-description-grounded contexts, and runs the evaluation/probing loop.
+- **Deepgram WebSockets**: Streams live speech-to-text transcripts with <300ms latency.
+- **Fail-Safe Fallbacks**: Ensures uninterrupted service by falling back to local client-side and direct-API modes if the Python service or primary LLM providers experience downtime.
 
 ---
 
-## Features
-
-### Context-Aware Questioning
-- **Job Description Targeting** — Users can paste a specific Job Description (JD) up to 2,000 characters before starting.
-- **Dynamic Probing** — Gemini AI tailors its generation to strictly probe the candidate on the exact tools, requirements, and responsibilities mentioned in the JD.
-
-### Session Integrity & Anti-Cheat
-- **Tab Switch Detection** — Monitors the browser Visibility API to silently track lost focus. Warns the user, then automatically terminates the session after 3 violations.
-- **Paste Tracking** — Intercepts clipboard events in the Answer Input to flag massive text dumps (30+ words).
-- **Integrity Score** — The final report calculates a strict integrity score based on infractions, permanently logging flags on the final hiring verdict.
-
-### Voice AI (Web Speech API — zero cost, zero API key)
-- **Text-to-Speech** — AI interviewer reads every question aloud on load
-- **Speech-to-Text** — mic button transcribes your spoken answer live into the textarea
-- **Mute toggle** and **Replay button** on every question card
-- Gracefully hidden on unsupported browsers (Firefox/Safari)
-
-### Multi-Provider AI Routing (never crashes)
-- **Primary**: Google Gemini 2.5 Flash Lite — best quality responses
-- **Fallback**: Groq (Llama 3.3 70B) — auto-triggers on 429/503 errors
-- **Last resort**: Hardcoded safe response — app works even if both providers fail
-- This is how production AI systems handle reliability at scale
-
-### Optimized API Quota (7 calls vs 15 before)
-- **1 call upfront** — all questions generated at once, stored in browser state
-- **1 call per answer** — real-time scorecard after each submission
-- **1 final call** — only narrative text from AI; grade/verdict/strengths computed locally
-- Questions still appear one at a time — user experience is identical
-
-### Streaming Hints
-- Click "Get Hint" → one-line coaching hint streams token-by-token via Gemini `generateContentStream()`
-- No waiting for full response — starts appearing instantly
-
-### 4-Dimension Answer Scoring
-Every answer scored 0–100 across:
-- **Overall** — composite quality
-- **Clarity** — how well you communicated
-- **Technical** — accuracy and depth
-- **Relevance** — how directly you addressed the question
-
-Plus local NLP: filler word detection (um, uh, like, basically...) and TF-IDF keyword scoring via `natural` npm package
-
-### Final Report
-- Grade (A/B/C/D) and hiring verdict — computed locally from scores (no extra API call)
-- **Strong Hire / Hire / Maybe / No Hire**
-- AI-written summary paragraph + personalized 2-week study plan
-- Top 3 strengths from your best answers, critical gaps from your weakest
-
-### Persistent Analytics Dashboard
-- Total interviews, average score, personal best — across all sessions
-- Performance trend line chart (Recharts)
-- Last 5 sessions with role, score, date, verdict
-- All data persists in MongoDB — survives logout, device change, anything
-
----
-
-## Architecture
+## System Architecture
 
 ```text
-User (Chrome / Edge)
-         │
-         ▼
-Next.js 14 Frontend (App Router)
-Landing · Login · Dashboard · Setup · Session · Report
-         │
-         ▼
-Next.js API Routes (server-side — keys never reach browser)
-┌────────────────────────────────────────────────────────┐
-│  generate-question  evaluate-answer  hint-stream       │
-│  final-report       sessions                           │
-└────────────────────────────────────────────────────────┘
-         │
-    lib/aiRouter.js
-    Gemini 2.5 Flash → Groq Llama 3.3 → Hardcoded fallback
-         │
-   ┌─────┼──────────────┐
-   ▼     ▼              ▼
-Gemini  Groq        MongoDB Atlas
-Primary Fallback    Users · Sessions · Reports
-         │
-   ┌─────┴──────────────┐
-   ▼                    ▼
-lib/nlpScorer.js    Web Speech API
-STT + TTS (browser native)
-         │
-         ▼
-    NextAuth.js
-Google OAuth + credentials
+               ┌─────────────────────────────────────────────────────────┐
+               │                     Browser Client                      │
+               │  - Voice (Web Speech TTS + Deepgram Streaming Mic STT)   │
+               │  - Anti-Cheat Guardrails (Visibility API & Clipboards)  │
+               └─────────────────────────────────────────────────────────┘
+                    │                                    ▲
+          HTTPS/JSON│                        WSS Audio   │ Transcripts (JSON)
+                    ▼                          Stream    ▼
+┌──────────────────────────────┐                ┌────────────────────────┐
+│  Next.js App Server (Vercel) │                │ Node WebSocket Server  │
+│  - User/Auth Management      │                │ - Secure Proxy Bridge  │
+│  - MongoDB Session History   │                │ - Port 3001 Gateway    │
+│  - Route Handlers & Fallback │                └────────────────────────┘
+└──────────────────────────────┘                             │
+        │                                                    │ WSS Audio Chunks
+        │ POST /api/v1/session                               ▼
+        ▼                                               ┌────────────────┐
+┌──────────────────────────────┐                        │  Deepgram API  │
+│  Python RAG Service (Render) │                        │  Nova-2 STT    │
+│  - FastAPI Endpoints         │                        └────────────────┘
+│  - LangGraph State Machine   │
+│  - Chroma Vector DB          │
+└──────────────────────────────┘
+        │
+        ├── RAG Rubrics & Grounding
+        ▼
+ ┌──────────────┐
+ │ Gemini / Groq│
+ └──────────────┘
 ```
 
 ---
 
-## 🎙️ Real-Time Audio Streaming Pipeline (Deepgram + WebSocket)
+## Key Features
 
-To provide an immersive, conversational interview experience, this app features a real-time, low-latency voice pipeline. Candidates speak into their microphone and see their transcripts update word-by-word on screen, mimicking live captioning.
+### 1. LangGraph Agent Loop (`ai-interview-service`)
+The interview conversation is structured as a state graph using **LangGraph**:
+- **Topic Control**: Progresses through core concepts logically.
+- **Dynamic Probing**: If a candidate provides a weak or incomplete answer, the graph automatically triggers a custom **follow-up node** to query the candidate's gaps in detail before moving to the next main topic.
+- **Context Grounding**: Evaluates the candidate's answers using retrieved corpus rubrics, marking responses as `Fact-Grounded` directly from verified technical sources.
 
-### 1. Streaming Pipeline Architecture
+### 2. Retrieval-Augmented Generation (RAG)
+- **ChromaDB Integration**: Embedded locally using `all-MiniLM-L6-v2` dense vectors.
+- **JD Targeting**: Analyzes user-pasted Job Descriptions and retrieves contextually relevant questions and reference answers from the local interview corpus.
+- **Dynamic Matching**: Automatically filters retrieved questions based on the candidate's target role (Frontend, Backend, Data Science) and difficulty level.
 
-```text
-┌──────────┐ (Mic Audio) ┌──────────────┐ (Audio Chunks) ┌──────────────┐
-│ Candidate│ ──────────> │ Node.js WS   │ ─────────────> │  Deepgram    │
-│ Browser  │             │ Server (3001)│                │  Nova-2 STT  │
-└──────────┘ <────────── └──────────────┘ <───────────── └──────────────┘
-              (Interim &    (Port 3001)    (Authorization    (Cloud STT)
-             Final JSON)                   Server-side Token)
-```
+### 3. Real-Time Audio Streaming (Deepgram WebSockets)
+- **Direct Streaming**: Streams mic input live in `250ms` binary chunks via browser `MediaRecorder` API.
+- **Proxy Gateway**: Runs a dedicated Node.js `ws` server on port `3001` that secure-proxies raw audio bytes to Deepgram's Live Streaming API, hiding `DEEPGRAM_API_KEY` from the browser.
+- **Interim & Final Feedback**: Displays real-time interim results in a pulsing bubble, committing finalized sentences to the input block as soon as natural pauses are detected.
 
-1. **Audio Capture:** The browser captures microphone input using the `MediaRecorder` API and slices it into small binary chunks every `250ms` (using `audio/webm` with opus, falling back to other native container formats).
-2. **WebSocket Gateway:** The binary chunks are streamed live over a secure WebSocket connection to our standalone Node.js server (`ws://localhost:3001`).
-3. **Secure Bridge:** The Node server acts as a proxy, immediately forwarding these raw audio bytes to Deepgram's Live Streaming STT API over a secure server-to-server WebSocket (`wss://api.deepgram.com/v1/listen`).
-4. **Credential Isolation:** The server-side proxy keeps the `DEEPGRAM_API_KEY` hidden from the client browser, completely eliminating exposure risks.
-5. **Real-time Feedback:** Deepgram returns transcript packages. The Node server relays these back to the browser in a normalized JSON structure: `{ type: "interim" | "final", text: "..." }`.
+### 4. Session Integrity & Anti-Cheat
+- **Tab Switch Detection**: Monitors focus changes. Warns the candidate, and terminates the session after 3 violations.
+- **Paste Interception**: Intercepts clipboard events to flag massive text dumps (30+ words).
+- **Integrity Score**: Logs infraction details and computes a final `Integrity Score / 100` that is permanently saved on the report.
 
-### 2. Engineering Trade-offs & Architecture Choices
+### 5. Multi-Provider AI Routing & Fallbacks
+- **Primary**: Google Gemini 2.5 Flash Lite — high performance.
+- **Secondary Fallback**: Groq (Llama 3.3 70B) — auto-routes on Gemini rate limits (429/503).
+- **Python API Guardrail**: If the Python RAG backend goes offline, the Next.js server automatically falls back to standard LLM evaluation so user sessions never crash.
 
-#### Why Streaming STT (Deepgram Nova-2) vs. Web Speech API vs. Whisper?
-* **vs. Web Speech API (One-Shot):** The Web Speech API runs client-side and requires the user to stop talking before yielding a transcript, which destroys the flow of a natural conversation. It also has inconsistent browser support (Safari and Firefox do not support its STT well) and varies in accuracy based on the user's OS. Deepgram streams transcripts *while* the candidate is speaking with >95% accuracy and cross-browser consistency.
-* **vs. OpenAI Whisper (REST API):** Whisper is primarily batch-based. Recording a 30-second response, saving it as a file, uploading it over HTTP, and waiting for the API response takes 3–5 seconds of latency. Deepgram Nova-2 is built for stream-based real-time audio with a sub-`300ms` response latency.
-
-#### Why Standalone WebSocket Server vs. Next.js Custom Server vs. Route Handlers?
-* **Route Handlers (Serverless API):** Next.js Route Handlers run in serverless functions (like Vercel). Serverless environments are stateless, do not support persistent TCP/WebSocket connections, and automatically time out after 10–60 seconds.
-* **Custom Next.js Server (`server.js` wrapping `next`):** Bypassing Next.js's CLI by using a custom server disables automatic static optimization and is extremely difficult to deploy on platforms like Vercel.
-* **Standalone Node WebSocket Server (Our Choice):** We run a lightweight Node server (`ws` library) on port `3001`. This keeps the Next.js frontend standard, allows easy containerized deployment of the WebSocket server (e.g. Render, Railway, DigitalOcean), and isolates real-time socket processing from Next.js page generation.
-
-### 3. Handling Interim vs. Final Transcripts
-To avoid UI flicker and browser cursor-jumping while typing or editing:
-* **Interim Transcripts (`{ type: "interim", text: "..." }`):** These represent tentative guesses from Deepgram as the user is speaking. The hook updates an `interimText` state. The UI renders this text inside a separate, pulsing, semi-transparent bubble overlay.
-* **Final Transcripts (`{ type: "final", text: "..." }`):** These occur when the user pauses (detected by Deepgram's `endpointing=300` setting). The server commits these sentences, appending them directly to the textarea `answer` state, and clears the interim buffer.
+### 6. Analytics Dashboard & Reports
+- **Performance Trends**: Tracks historical scores with interactive charts (Recharts).
+- **Comprehensive Final Reports**: Grade (A/B/C/D), Hiring Verdict (Strong Hire, Hire, Maybe, No Hire), AI summary, top strengths, critical gaps, and a personalized 2-week roadmap.
+- **Security Vaulting**: Automatically or manually archives session details to MongoDB Atlas.
 
 ---
 
 ## Tech Stack
 
-| Layer | Technology | Purpose |
-|---|---|---|
-| Framework | Next.js 14 (App Router) | Full-stack SSR + API routes |
-| Primary AI | Google Gemini 2.5 Flash Lite | Questions, evaluation, hints, reports |
-| Fallback AI | Groq — Llama 3.3 70B | Auto-fallback, 1000 RPD free |
-| Voice | Web Speech API | STT mic input + TTS question reader |
-| Anti-Cheat | DOM & Clipboard APIs | Tracks tab switches and limits copy-pasting |
-| NLP | natural + compromise | TF-IDF scoring, filler word detection |
-| Auth | NextAuth.js | Google OAuth + email/password |
-| Database | MongoDB Atlas + Mongoose | Persistent sessions and user data |
-| Styling | Tailwind CSS | Glassmorphism design system |
-| Charts | Recharts | Analytics dashboard |
-| Hosting | Vercel | Auto-deploy on every git push |
+| Layer | Technology | Description |
+| :--- | :--- | :--- |
+| **Frontend Framework** | Next.js 14 (App Router) | React server components, route handlers |
+| **Python Backend** | FastAPI + Uvicorn | High-performance Python backend |
+| **Agentic Loop** | LangGraph | Complex conversation flow/follow-up graph |
+| **Vector Database** | ChromaDB | Persistent local semantic vector index |
+| **Audio Gateway** | Node.js + `ws` | Secure server WebSocket bridge |
+| **Speech-to-Text** | Deepgram Nova-2 | Streaming real-time STT |
+| **Text-to-Speech** | Web Speech API | Native browser reading |
+| **AI LLM Routing** | Gemini 2.5 + Groq Llama 3.3 | Smart routing with retry & backoff |
+| **Database** | MongoDB Atlas + Mongoose | User profiles and session history |
+| **Analytics Charts** | Recharts | Performance trends |
 
 ---
 
-## Quick Start
+## Project Directory Structures
 
-### Prerequisites
-- Node.js v18+
-- MongoDB Atlas (free tier) — [mongodb.com/atlas](https://mongodb.com/atlas)
-- Gemini API key (free) — [aistudio.google.com](https://aistudio.google.com)
-- Groq API key (free) — [console.groq.com](https://console.groq.com)
-
-### 1. Clone & Install
-
-```bash
-git clone https://github.com/vanshikav312/ai-mock-interviewer.git
-cd ai-mock-interviewer
-npm install
-```
-
-### 2. Environment Variables
-
-Create `.env.local` in the root directory:
-
-```env
-# Database
-MONGODB_URI=mongodb+srv://<user>:<pass>@cluster0.xxxxx.mongodb.net/ai-mock-interviewer
-
-# Auth
-NEXTAUTH_SECRET=your-random-32-char-secret
-NEXTAUTH_URL=http://localhost:3000
-
-# AI — Primary
-GEMINI_API_KEY=your-gemini-api-key
-
-# AI — Fallback
-GROQ_API_KEY=your-groq-api-key
-
-# Google OAuth (optional — email login works without this)
-GOOGLE_CLIENT_ID=your-google-client-id
-GOOGLE_CLIENT_SECRET=your-google-client-secret
-```
-
-> Generate `NEXTAUTH_SECRET`:
-> ```bash
-> node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
-> ```
-
-> Google OAuth redirect URI: `http://localhost:3000/api/auth/callback/google`
-
-### 3. Run
-
-```bash
-npm run dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) in **Chrome or Edge**.
-
----
-
-## 🌐 Deploy to Vercel
-
-```bash
-npx vercel
-```
-
-1. Link to your GitHub repo when prompted — every `git push` auto-deploys after this
-2. Add all `.env.local` vars in **Vercel Dashboard → Settings → Environment Variables**
-3. Set `NEXTAUTH_URL` to your production URL e.g. `https://ai-mock-interviewer-umber.vercel.app`
-4. MongoDB Atlas → **Network Access** → Add IP `0.0.0.0/0`
-5. Google Cloud Console → add redirect URI: `https://your-app.vercel.app/api/auth/callback/google`
-
----
-
-## Project Structure
-
+### 1. Next.js Frontend (`ai-mock-interviewer`)
 ```text
 ai-mock-interviewer/
 ├── app/
@@ -244,106 +119,123 @@ ai-mock-interviewer/
 │   ├── dashboard/page.jsx
 │   ├── interview/
 │   │   ├── setup/page.jsx          ← JD targeting + Rules Box
-│   │   ├── session/page.jsx        ← bulk questions, TTS, anti-cheat limits, useRef state
-│   │   └── report/page.jsx         ← sessionStorage handoff, auto-save
+│   │   ├── session/page.jsx        ← Conversation interface, TTS/STT hooks, anti-cheat limits
+│   │   └── report/page.jsx         ← Performance summary cards + MongoDB auto-saving
 │   └── api/
 │       ├── auth/[...nextauth]/route.js
-│       ├── auth/register/route.js
 │       ├── interview/
-│       │   ├── generate-question/route.js   ← bulk + single mode
-│       │   ├── evaluate-answer/route.js     ← AI router + NLP
-│       │   ├── hint-stream/route.js         ← Gemini streaming
-│       │   └── final-report/route.js        ← local math + AI narrative
+│       │   ├── generate-question/route.js   ← Fallback question generator
+│       │   ├── evaluate-answer/route.js     ← Fallback direct LLM scorer
+│       │   ├── hint-stream/route.js         ← Streaming coaching tips
+│       │   ├── final-report/route.js        ← Locally-computed metrics + narrative generator
+│       │   └── rag-session/route.js         ← Proxy to Python RAG service
 │       └── sessions/route.js
 ├── components/
-│   ├── auth/AuthForm.jsx
 │   ├── interview/
-│   │   ├── RoleSelector.jsx
-│   │   ├── QuestionCard.jsx        ← TTS replay + mute toggle
-│   │   ├── AnswerInput.jsx         ← STT mic button + Paste Detection
-│   │   ├── HintBox.jsx
-│   │   ├── ScoreCard.jsx
-│   │   └── FinalReport.jsx         ← Displays Integrity Score
+│   │   ├── QuestionCard.jsx        ← Audio controls & AI follow-up badges
+│   │   ├── AnswerInput.jsx         ← Live speech transcription overlay
+│   │   ├── ScoreCard.jsx           ← 4-Dimension granular scores
+│   │   └── FinalReport.jsx         ← Performance stats & Integrity score
 │   └── dashboard/
-│       ├── StatsGrid.jsx
-│       └── PerformanceChart.jsx
+│       └── PerformanceChart.jsx    ← Recharts analytics
 ├── hooks/
-│   └── useSpeech.js                ← STT + TTS (Web Speech API)
-├── lib/
-│   ├── db.js                       ← MongoDB connection pooling
-│   ├── gemini.js                   ← Gemini functions + withRetry
-│   ├── aiRouter.js                 ← Gemini → Groq → hardcoded fallback
-│   └── nlpScorer.js                ← TF-IDF + filler word detection
+│   └── useSpeech.js                ← Browser TTS/STT hooks
+├── server.js                       ← Node.js WebSocket gateway for Deepgram
 └── models/
     ├── User.js
     └── Session.js
 ```
 
----
-
-## API Usage — Before vs After Optimization
-
-| Metric | Before | After |
-|---|---|---|
-| API calls per 5-question session | 10–15 | **7** |
-| Questions generated per API call | 1 | **5 (bulk)** |
-| Final report AI calls | 1 full Gemini | **1 narrative only** |
-| Grade / verdict computation | Gemini | **Local (instant, free)** |
-| App when Gemini hits rate limit | ❌ Crashes | ✅ Routes to Groq |
-| App when both providers down | ❌ Crashes | ✅ Safe fallback response |
-
----
-
-## API Reference
-
-| Method | Endpoint | Description |
-|---|---|---|
-| POST | `/api/interview/generate-question` | Bulk or single question generation |
-| POST | `/api/interview/evaluate-answer` | Score via AI router + local NLP |
-| POST | `/api/interview/hint-stream` | Stream coaching hint (Gemini) |
-| POST | `/api/interview/final-report` | Local math + AI narrative |
-| GET | `/api/sessions` | Fetch user's past sessions |
-| POST | `/api/sessions` | Save completed session |
+### 2. Python Backend (`ai-interview-service`)
+```text
+ai-interview-service/
+├── data/
+│   └── interview_corpus.json       ← Question rubrics and baseline answers
+├── graph/
+│   ├── state.py                    ← Graph structure definition
+│   └── workflow.py                 ← LangGraph orchestration loop
+├── rag/
+│   ├── corpus_loader.py            ← ChromaDB setup and data ingestion
+│   ├── retriever.py                ← Semantic queries
+│   └── web_retriever.py            ← Tavily web search synthesis
+├── routers/
+│   └── session.py                  ← FastAPI session & answer endpoints
+├── main.py                         ← Application bootstrap
+└── requirements.txt                ← Dependencies configuration
+```
 
 ---
 
-##  Key Engineering Decisions
+## Quick Start
 
-**`sessionStorage` for report handoff** — passing all Q&A data as URL params caused HTTP 431 (headers too large). Switched to sessionStorage which handles any payload size.
+### Prerequisites
+- Node.js v18+
+- Python 3.10+
+- MongoDB Atlas account (free tier)
+- Gemini API Key
+- Groq API Key
+- Deepgram API Key
 
-**`useRef` for allQAs** — React's stale closure bug caused the last question's answer to be dropped from the final report. Using `useRef` instead of `useState` for the accumulating array fixed this.
+### 1. Set Up the Python Backend
+1. Navigate to the backend directory and set up a virtual environment:
+   ```bash
+   cd ai-interview-service
+   python -m venv venv
+   source venv/bin/activate  # On Windows: .\venv\Scripts\activate
+   ```
+2. Install Python dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+3. Create a `.env` file:
+   ```env
+   GROQ_API_KEY=your-groq-key
+   TAVILY_API_KEY=your-tavily-key
+   ```
+4. Start the FastAPI server:
+   ```bash
+   uvicorn main:app --reload --port 8000
+   ```
 
-**`withRetry` on Gemini calls** — reads the `retryDelay` header from Gemini's 429 response and waits exactly that long before retrying, instead of a blind exponential backoff.
+### 2. Set Up the Next.js Frontend
+1. Open a new terminal and navigate to the frontend directory:
+   ```bash
+   cd ai-mock-interviewer
+   npm install
+   ```
+2. Create a `.env.local` file:
+   ```env
+   # DB & Auth
+   MONGODB_URI=mongodb+srv://...
+   NEXTAUTH_SECRET=your-32-character-secret
+   NEXTAUTH_URL=http://localhost:3000
 
-**Local grade computation** — grade, verdict, topStrengths, and criticalGaps are all computed from already-available scores. Only the summary paragraph and nextSteps need an AI call, cutting final-report cost by ~70%.
+   # APIs
+   GEMINI_API_KEY=your-gemini-key
+   GROQ_API_KEY=your-groq-key
+   DEEPGRAM_API_KEY=your-deepgram-key
+
+   # Services
+   PYTHON_API_URL=http://localhost:8000
+   NEXT_PUBLIC_WS_URL=ws://localhost:3001
+   ```
+3. Run both the Next.js app and the WebSocket gateway simultaneously:
+   ```bash
+   npm run dev:all
+   ```
+
+Open **`http://localhost:3000`** in Chrome or Edge to run through the full integrated pipeline!
 
 ---
 
-## Browser Compatibility
+## Production Deployment
 
-| Feature | Chrome | Edge | Firefox | Safari |
-|---|---|---|---|---|
-| Speech-to-Text (mic) | ✅ | ✅ | ❌ | ❌ |
-| Text-to-Speech (read aloud) | ✅ | ✅ | ✅ | ✅ |
-| Core app (no voice) | ✅ | ✅ | ✅ | ✅ |
+This project is optimized for deployment across:
+- **Vercel** (Frontend Next.js app)
+- **Render** (Python Backend Web Service & Node.js WebSocket Gateway)
 
----
+For detailed deployment instructions, including setup options, persistent directories, and live WebSocket routing, refer to the [Production Deployment Guide](file:///C:/Users/Dell/.gemini/antigravity-ide/brain/03a30cd8-e9b7-4f87-818f-c9b67f5808ba/deployment_guide.md).
 
-## What I Would Build Next
-
-- Resume upload → auto-generate questions tailored to your CV
-- Company-specific question banks (Razorpay, Google, Flipkart)
-- Peer leaderboard — compare scores across users
-- Interview session recording + playback
-- WhatsApp bot for daily quick-practice sessions
-
----
-
-## Author
-
-**Vanshika**
-- GitHub: [@vanshikav312](https://github.com/vanshikav312)
-- LinkedIn: [Vanshika](https://www.linkedin.com/in/vanshikav731/)
 ---
 
 ## License

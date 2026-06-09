@@ -2,7 +2,7 @@
 
 export default function QuestionCard({
   question, questionNumber, totalQuestions,
-  onReplay, speaking, muted, onToggleMute, ttsSupported,
+  onReplay, speaking, muted, onToggleMute, ttsSupported, isFollowUp,
 }) {
   const progress = (questionNumber / totalQuestions) * 100;
 
@@ -20,6 +20,11 @@ export default function QuestionCard({
           <span className="text-[10px] font-black text-muted uppercase tracking-widest">
             Question of {totalQuestions}
           </span>
+          {isFollowUp && (
+            <span className="ml-2 bg-accent text-white text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-pill">
+              AI Follow-Up
+            </span>
+          )}
         </div>
         
         <div className="flex items-center gap-3">
