@@ -47,7 +47,7 @@ export default function SetupPage() {
   return (
     <div className="min-h-screen bg-soft selection:bg-luxury/10">
       {/* Floating Navigation */}
-      <nav className="fixed top-6 left-1/2 -translate-x-1/2 z-50 w-[90%] max-w-4xl">
+      <nav className="fixed top-6 left-1/2 -translate-x-1/2 z-50 w-[95%] max-w-6xl">
         <div className="glass-panel px-8 py-4 rounded-pill flex items-center justify-between shadow-soft border border-depth/20">
           <Link href="/dashboard" className="flex items-center gap-3">
             <img src="/logo.png" alt="Logo" className="w-16 h-16 object-contain" />
@@ -59,7 +59,7 @@ export default function SetupPage() {
         </div>
       </nav>
 
-      <main className="max-w-4xl mx-auto px-6 pt-32 pb-20">
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-32 pb-20">
         {errorMsg && (
           <div className="mb-8 p-4 bg-red-500/10 border-2 border-red-500 rounded-xl text-red-500 text-center font-bold animate-slide-up">
             🚨 {errorMsg}

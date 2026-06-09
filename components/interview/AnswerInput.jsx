@@ -91,7 +91,7 @@ export default function AnswerInput({
   };
 
   return (
-    <div className="soft-card p-10 animate-slide-up">
+    <div className="soft-card p-6 sm:p-10 animate-slide-up">
       {/* Header row */}
       <div className="flex items-center justify-between mb-6">
         <label className="text-[10px] font-black text-muted uppercase tracking-widest">

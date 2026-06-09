@@ -7,7 +7,7 @@ export default function QuestionCard({
   const progress = (questionNumber / totalQuestions) * 100;
 
   return (
-    <div className="soft-card-elevated p-10 animate-slide-up relative overflow-hidden group">
+    <div className="soft-card-elevated p-6 sm:p-10 animate-slide-up relative overflow-hidden group">
       {/* Decorative side accent */}
       <div className="absolute left-0 top-0 bottom-0 w-2 bg-luxury opacity-10 group-hover:opacity-100 transition-opacity" />
 

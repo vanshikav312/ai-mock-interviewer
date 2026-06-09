@@ -23,7 +23,7 @@ export default function ScoreCard({ evaluation, onNext, isLast }) {
   const { score, clarity, technical, relevance, strengths, improvements, idealAnswer, verdict, fillerWordCount, fillerWords } = evaluation;
 
   return (
-    <div className="soft-card p-10 space-y-10 animate-slide-up relative overflow-hidden">
+    <div className="soft-card p-6 sm:p-10 space-y-8 sm:space-y-10 animate-slide-up relative overflow-hidden">
       <div className="flex flex-col sm:flex-row items-center justify-between gap-6 pb-8 border-b border-depth/30">
         <h3 className="text-3xl font-black text-luxury tracking-tighter">Evaluation</h3>
         <span className={`px-6 py-2 rounded-pill border-2 text-xs font-black uppercase tracking-widest shadow-soft ${VERDICT_STYLES[verdict] || VERDICT_STYLES['Average']}`}>
@@ -54,15 +54,15 @@ export default function ScoreCard({ evaluation, onNext, isLast }) {
       )}
 
       <div className="grid grid-cols-1 gap-6">
-        <div className="bg-soft border border-depth/30 rounded-3xl p-8 hover:bg-white transition-colors group">
+        <div className="bg-soft border border-depth/30 rounded-3xl p-6 sm:p-8 hover:bg-white transition-colors group">
           <p className="text-luxury text-[10px] font-black uppercase tracking-widest mb-4 opacity-50 group-hover:opacity-100">✓ Strengths</p>
           <p className="text-luxury text-sm leading-relaxed font-medium">{strengths}</p>
         </div>
-        <div className="bg-accent/5 border border-accent/10 rounded-3xl p-8 hover:bg-white transition-colors group">
+        <div className="bg-accent/5 border border-accent/10 rounded-3xl p-6 sm:p-8 hover:bg-white transition-colors group">
           <p className="text-accent text-[10px] font-black uppercase tracking-widest mb-4 opacity-50 group-hover:opacity-100">↑ Improvements</p>
           <p className="text-luxury text-sm leading-relaxed font-medium">{improvements}</p>
         </div>
-        <div className="bg-luxury/5 border border-luxury/10 rounded-3xl p-8 hover:bg-white transition-colors group">
+        <div className="bg-luxury/5 border border-luxury/10 rounded-3xl p-6 sm:p-8 hover:bg-white transition-colors group">
           <p className="text-luxury text-[10px] font-black uppercase tracking-widest mb-4 opacity-50 group-hover:opacity-100">★ Ideal Perspective</p>
           <p className="text-luxury text-sm leading-relaxed font-medium">{idealAnswer}</p>
         </div>

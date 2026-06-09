@@ -22,7 +22,7 @@ export default function FinalReport({ report, role, difficulty, onSave, saving, 
 
   return (
     <div className="space-y-10">
-      <div className="soft-card-elevated p-12 text-center relative overflow-hidden group !bg-[#0F3D2E] text-white shadow-2xl">
+      <div className="soft-card-elevated p-6 sm:p-12 text-center relative overflow-hidden group !bg-[#0F3D2E] text-white shadow-2xl">
         {/* Background glow */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[200px] bg-white/5 blur-[100px] pointer-events-none group-hover:scale-110 transition-transform duration-1000" />
         
@@ -98,7 +98,7 @@ export default function FinalReport({ report, role, difficulty, onSave, saving, 
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div className="soft-card p-8 !bg-[#0F3D2E] text-white">
+        <div className="soft-card p-6 sm:p-8 !bg-[#0F3D2E] text-white">
           <h3 className="text-white/40 text-[10px] font-black mb-6 tracking-widest uppercase">✓ Peak Performance Areas</h3>
           <ul className="space-y-4">
             {topStrengths?.map((s, i) => (
@@ -110,7 +110,7 @@ export default function FinalReport({ report, role, difficulty, onSave, saving, 
           </ul>
         </div>
         
-        <div className="soft-card p-8 !bg-[#0F3D2E] text-white">
+        <div className="soft-card p-6 sm:p-8 !bg-[#0F3D2E] text-white">
           <h3 className="text-white/40 text-[10px] font-black mb-6 tracking-widest uppercase">↑ Growth Opportunities</h3>
           <ul className="space-y-4">
             {criticalGaps?.map((g, i) => (
@@ -123,7 +123,7 @@ export default function FinalReport({ report, role, difficulty, onSave, saving, 
         </div>
       </div>
 
-      <div className="soft-card p-10">
+      <div className="soft-card p-6 sm:p-10">
         <h3 className="text-luxury text-[10px] font-black mb-6 tracking-widest uppercase opacity-40">Curated Study Roadmap</h3>
         <div className="flex flex-wrap gap-3">
           {studyTopics?.map((t, i) => (
@@ -134,7 +134,7 @@ export default function FinalReport({ report, role, difficulty, onSave, saving, 
         </div>
       </div>
 
-      <div className="bg-accent/5 border-2 border-accent/10 rounded-3xl p-10 shadow-inner-soft">
+      <div className="bg-accent/5 border-2 border-accent/10 rounded-3xl p-6 sm:p-10 shadow-inner-soft">
         <h3 className="text-accent text-[10px] font-black mb-4 tracking-widest uppercase">Strategy for Next Session</h3>
         <p className="text-luxury text-base leading-relaxed font-bold opacity-80">{nextSteps}</p>
       </div>
