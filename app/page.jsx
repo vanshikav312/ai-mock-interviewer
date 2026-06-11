@@ -23,106 +23,106 @@ export default function HomePage() {
       </nav>
 
       {/* Hero Section - Storytelling Layout */}
-      <section className="relative pt-40 pb-20 px-6 max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 items-center gap-16">
-        <div className="space-y-10 animate-slide-up w-full min-w-0">
+      <section className="relative pt-32 pb-16 px-6 max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 items-center gap-16">
+        <div className="space-y-8 animate-slide-up w-full min-w-0">
           <div className="inline-flex items-center gap-2 bg-luxury/5 border border-luxury/10 text-luxury text-xs font-black px-4 py-1.5 rounded-pill tracking-widest uppercase">
             Next-Gen Interview Prep
           </div>
-          <h1 className="text-5xl md:text-7xl lg:text-8xl font-black text-luxury leading-[0.9] tracking-tighter break-words">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-luxury leading-[0.95] tracking-tighter break-words">
             Practice.<br />
             Polish.<br />
             <span className="text-accent italic">Perfect.</span>
           </h1>
-          <p className="text-muted text-xl max-w-xl leading-relaxed font-medium">
+          <p className="text-muted text-lg max-w-xl leading-relaxed font-medium">
             A production-grade AI interview simulator with voice, real-time hints, multi-provider AI routing, and persistent analytics.
           </p>
           <div className="flex flex-wrap gap-4">
-            <Link href="/register" className="pill-btn bg-accent text-white px-12 py-5 text-lg shadow-soft hover:shadow-elevated hover:-translate-y-1">
+            <Link href="/register" className="pill-btn bg-accent text-white px-8 py-4 text-base shadow-soft hover:shadow-elevated hover:-translate-y-1">
               Start Free Trial
             </Link>
           </div>
         </div>
 
         {/* Asymmetric Mixed Layout Blocks */}
-        <div className="relative w-full h-[450px] lg:h-[600px] animate-fade-in mt-12 lg:mt-0">
-          <div className="absolute top-0 lg:top-10 right-0 lg:right-4 w-64 lg:w-72 soft-card p-6 rotate-3 z-20 animate-float">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-12 h-12 rounded-2xl bg-soft flex items-center justify-center text-2xl shadow-inner-soft opacity-20">•</div>
+        <div className="relative w-full h-[380px] lg:h-[480px] animate-fade-in mt-12 lg:mt-0">
+          <div className="absolute top-0 lg:top-6 right-0 lg:right-4 w-56 lg:w-64 soft-card p-5 rotate-3 z-20 animate-float">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-xl bg-soft flex items-center justify-center text-xl shadow-inner-soft opacity-20">•</div>
               <div>
-                <p className="text-[10px] font-black uppercase text-accent tracking-widest">AI Suggestion</p>
+                <p className="text-[9px] font-black uppercase text-accent tracking-widest">AI Suggestion</p>
                 <p className="text-xs font-bold text-luxury">Real-time Hints</p>
               </div>
             </div>
-            <div className="space-y-3">
-              <div className="h-2 w-full bg-soft rounded-full" />
-              <div className="h-2 w-3/4 bg-soft rounded-full" />
-              <div className="h-2 w-1/2 bg-accent/20 rounded-full" />
+            <div className="space-y-2.5">
+              <div className="h-1.5 w-full bg-soft rounded-full" />
+              <div className="h-1.5 w-3/4 bg-soft rounded-full" />
+              <div className="h-1.5 w-1/2 bg-accent/20 rounded-full" />
             </div>
-            <p className="mt-8 text-xs text-muted leading-relaxed italic">"Try explaining the time complexity before writing the code..."</p>
+            <p className="mt-6 text-[11px] text-muted leading-relaxed italic">"Try explaining the time complexity before writing the code..."</p>
           </div>
 
-          <div className="absolute bottom-0 lg:bottom-10 left-0 lg:left-4 w-72 lg:w-80 soft-card-elevated p-8 -rotate-2 z-10">
-            <div className="flex justify-between items-end mb-8">
+          <div className="absolute bottom-0 lg:bottom-6 left-0 lg:left-4 w-64 lg:w-72 soft-card-elevated p-6 -rotate-2 z-10">
+            <div className="flex justify-between items-end mb-6">
               <div>
-                <p className="text-4xl font-black text-luxury">82%</p>
-                <p className="text-xs font-bold text-muted uppercase">Confidence Rate</p>
+                <p className="text-3xl font-black text-luxury">82%</p>
+                <p className="text-[10px] font-bold text-muted uppercase">Confidence Rate</p>
               </div>
-              <div className="w-16 h-16 rounded-full border-8 border-soft border-t-accent animate-spin" style={{ animationDuration: '3s' }} />
+              <div className="w-12 h-12 rounded-full border-4 border-soft border-t-accent animate-spin" style={{ animationDuration: '3s' }} />
             </div>
-            <div className="space-y-4">
-              <div className="flex justify-between text-[10px] font-bold text-muted">
+            <div className="space-y-3">
+              <div className="flex justify-between text-[9px] font-bold text-muted">
                 <span>Clarity</span>
                 <span>9/10</span>
               </div>
-              <div className="h-2 w-full bg-soft rounded-full overflow-hidden">
+              <div className="h-1.5 w-full bg-soft rounded-full overflow-hidden">
                 <div className="h-full bg-luxury w-[90%]" />
               </div>
             </div>
           </div>
 
           {/* Background Decorative Blur */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-accent/5 rounded-full blur-[120px] -z-10" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[110%] h-[110%] bg-accent/5 rounded-full blur-[100px] -z-10" />
         </div>
       </section>
 
       {/* Feature Section - Mixed Layout */}
-      <section id="features" className="py-32 px-6 bg-white/50 backdrop-blur-xl">
+      <section id="features" className="py-24 px-6 bg-white/50 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto">
-          <div className="mb-20 text-center space-y-4">
-            <h2 className="text-5xl font-black text-luxury tracking-tighter">Everything you need to land the job.</h2>
-            <p className="text-muted font-medium max-w-xl mx-auto text-lg">Designed for depth, built for real-world engineering. Every feature solves a real interview prep problem.</p>
+          <div className="mb-16 text-center space-y-4">
+            <h2 className="text-4xl font-black text-luxury tracking-tighter">Everything you need to land the job.</h2>
+            <p className="text-muted font-medium max-w-xl mx-auto text-base">Designed for depth, built for real-world engineering. Every feature solves a real interview prep problem.</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
-            <div className="md:col-span-7 soft-card p-12 !bg-[#0F3D2E] text-white flex flex-col justify-between group hover:-translate-y-1">
+            <div className="md:col-span-7 soft-card p-10 !bg-[#0F3D2E] text-white flex flex-col justify-between group hover:-translate-y-1">
               <div>
-                <div className="w-16 h-16 rounded-3xl bg-white flex items-center justify-center mb-8 border border-white/10 shadow-soft overflow-hidden">
+                <div className="w-14 h-14 rounded-2xl bg-white flex items-center justify-center mb-6 border border-white/10 shadow-soft overflow-hidden">
                   <img src="/feature_dynamic.png" alt="Dynamic AI" className="w-full h-full object-cover" />
                 </div>
-                <h3 className="text-4xl font-black mb-4 tracking-tighter">Dynamic AI Architect</h3>
-                <p className="text-white/60 text-lg font-medium leading-relaxed max-w-md">Gemini-powered questions that adapt to your role, level, and performance in real-time.</p>
+                <h3 className="text-3xl font-black mb-3 tracking-tighter">Dynamic AI Architect</h3>
+                <p className="text-white/60 text-base font-medium leading-relaxed max-w-md">Gemini-powered questions that adapt to your role, level, and performance in real-time.</p>
               </div>
-              <div className="mt-12 flex gap-4 overflow-x-auto pb-4 no-scrollbar">
+              <div className="mt-8 flex gap-3 overflow-x-auto pb-2 no-scrollbar">
                 {['React', 'System Design', 'Node.js', 'Python'].map(tag => (
-                  <span key={tag} className="flex-shrink-0 bg-white/10 px-6 py-2 rounded-pill text-xs font-bold border border-white/5">{tag}</span>
+                  <span key={tag} className="flex-shrink-0 bg-white/10 px-5 py-1.5 rounded-pill text-[11px] font-bold border border-white/5">{tag}</span>
                 ))}
               </div>
             </div>
 
-            <div className="md:col-span-5 space-y-8">
-              <div className="soft-card p-10 !bg-[#0F3D2E] text-white hover:-translate-y-1 group">
-                <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center mb-6 shadow-inner-soft border border-white/10 overflow-hidden">
+            <div className="md:col-span-5 space-y-6">
+              <div className="soft-card p-8 !bg-[#0F3D2E] text-white hover:-translate-y-1 group">
+                <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center mb-4 shadow-inner-soft border border-white/10 overflow-hidden">
                   <img src="/feature_metrics.png" alt="Metrics" className="w-full h-full object-cover" />
                 </div>
-                <h3 className="text-xl font-bold text-white mb-2 tracking-tight">Deep Score Metrics</h3>
-                <p className="text-white/60 text-sm leading-relaxed font-medium">Multidimensional analysis across clarity, relevance, and technical depth.</p>
+                <h3 className="text-lg font-bold text-white mb-1.5 tracking-tight">Deep Score Metrics</h3>
+                <p className="text-white/60 text-xs leading-relaxed font-medium">Multidimensional analysis across clarity, relevance, and technical depth.</p>
               </div>
-              <div className="soft-card p-10 !bg-[#0F3D2E] text-white hover:-translate-y-1 group">
-                <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center mb-6 shadow-inner-soft border border-white/10 overflow-hidden">
+              <div className="soft-card p-8 !bg-[#0F3D2E] text-white hover:-translate-y-1 group">
+                <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center mb-4 shadow-inner-soft border border-white/10 overflow-hidden">
                   <img src="/feature_voice.png" alt="Voice" className="w-full h-full object-cover" />
                 </div>
-                <h3 className="text-xl font-bold text-white mb-2 tracking-tight">Hear the Question. Say Your Answer.</h3>
-                <p className="text-white/60 text-sm leading-relaxed font-medium">Practice speaking by answering questions out loud, just like in a real interview.</p>
+                <h3 className="text-lg font-bold text-white mb-1.5 tracking-tight">Hear the Question. Say Your Answer.</h3>
+                <p className="text-white/60 text-xs leading-relaxed font-medium">Practice speaking by answering questions out loud, just like in a real interview.</p>
               </div>
             </div>
           </div>
@@ -130,12 +130,12 @@ export default function HomePage() {
       </section>
 
       {/* CTA Footer Section */}
-      <section id="cta" className="py-40 px-6 text-center">
-        <div className="max-w-3xl mx-auto space-y-12 animate-slide-up">
-          <h2 className="text-6xl md:text-8xl font-black text-luxury tracking-tighter">Ready to ace it?</h2>
-          <p className="text-muted text-xl font-medium max-w-lg mx-auto">Join developers leveling up their interview skills with AI-powered, voice-enabled mock sessions.</p>
+      <section id="cta" className="py-28 px-6 text-center">
+        <div className="max-w-3xl mx-auto space-y-10 animate-slide-up">
+          <h2 className="text-4xl md:text-6xl font-black text-luxury tracking-tighter">Ready to ace it?</h2>
+          <p className="text-muted text-lg font-medium max-w-lg mx-auto">Join developers leveling up their interview skills with AI-powered, voice-enabled mock sessions.</p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
-            <Link href="/register" className="pill-btn bg-luxury text-white px-12 py-5 text-lg shadow-soft hover:shadow-elevated hover:-translate-y-1">
+            <Link href="/register" className="pill-btn bg-luxury text-white px-8 py-4 text-base shadow-soft hover:shadow-elevated hover:-translate-y-1">
               Create My Account
             </Link>
           </div>
