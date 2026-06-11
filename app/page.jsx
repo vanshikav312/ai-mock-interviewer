@@ -4,7 +4,7 @@ export default function HomePage() {
   return (
     <main className="min-h-screen bg-soft overflow-x-hidden selection:bg-luxury/10">
       {/* Floating Navigation */}
-      <nav className="fixed top-8 left-1/2 -translate-x-1/2 z-50 w-[90%] max-w-4xl">
+      <nav className="fixed top-8 left-1/2 -translate-x-1/2 z-50 w-[90%] max-w-7xl">
         <div className="glass-panel px-8 py-4 rounded-pill flex items-center justify-between shadow-soft border border-depth/20">
           <div className="flex items-center gap-3" role="banner">
             <img src="/logo.png" alt="Logo" className="w-16 h-16 object-contain" />
@@ -13,7 +13,6 @@ export default function HomePage() {
           <div className="flex items-center gap-8">
             <div className="hidden md:flex items-center gap-8">
               <Link href="#features" className="text-sm font-bold text-muted hover:text-luxury transition-colors">Features</Link>
-              <Link href="#cta" className="text-sm font-bold text-muted hover:text-luxury transition-colors">Get Started</Link>
               <Link href="#cta" className="text-sm font-bold text-muted hover:text-luxury transition-colors">Get Started</Link>
             </div>
             <Link href="/register" className="pill-btn bg-luxury text-white px-8 py-2.5 text-sm shadow-soft hover:shadow-elevated hover:-translate-y-0.5">

@@ -54,7 +54,7 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-soft selection:bg-luxury/10">
       {/* Floating Navigation */}
-      <nav className="fixed top-6 left-1/2 -translate-x-1/2 z-50 w-[90%] max-w-5xl">
+      <nav className="fixed top-6 left-1/2 -translate-x-1/2 z-50 w-[90%] max-w-6xl">
         <div className="glass-panel px-8 py-4 rounded-pill flex items-center justify-between shadow-soft border border-depth/20">
           <Link href="/" className="flex items-center gap-3">
             <img src="/logo.png" alt="Logo" className="w-16 h-16 object-contain" />
