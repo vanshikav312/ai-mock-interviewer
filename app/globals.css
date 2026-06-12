@@ -4,6 +4,14 @@
 
 @layer base {
   * { box-sizing: border-box; }
+  html {
+    font-size: 14px;
+  }
+  @media (min-width: 768px) {
+    html {
+      font-size: 15px;
+    }
+  }
   body { 
     @apply bg-soft text-slate-800 antialiased;
     font-feature-settings: "cv02", "cv05", "cv11";
